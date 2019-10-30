@@ -1,0 +1,70 @@
+# Folders to ignore, whatever the place they are
+ 
+.metadata
+classes
+eclipsebin
+gensrc
+
+# Folders to ignore at the root of the repository
+hybris/roles/
+hybris/log/
+hybris/temp/
+hybris/data/
+hybris/local-config
+
+# filter only custom extension
+hybris/bin/*
+!hybris/bin/custom/
+ 
+#IDE files
+.gradle
+.idea
+idea-module-files
+*.iml
+com.springsource.sts.config.flow.prefs
+org.sonar.ide.eclipse.core.prefs
+HybrisCodeGeneration.launch
+
+org.springframework.ide.eclipse.beans.core.prefs
+org.springframework.ide.eclipse.core.prefs
+.springBeans
+
+# Filename patterns to ignore
+*.class
+build.xml
+Generated*.java
+platformhome.properties
+*testclasses.xml
+extensioninfo.xsd
+*hmc.jar
+hmc.xsd
+items.xsd
+beans.xsd
+ruleset.xml
+*.log
+.pmd
+*build.number
+
+base.properties
+#  Addon specific copy folders
+**/_ui/addons
+**/views/addons
+**/tld/addons
+**/tags/addons
+**/messages/addons
+**/web/addonsrc
+**/_ui-src/addons
+**/web/addontestsrc
+**/web/commonwebsrc/*/
+
+*_bof.jar
+
+# project ignore
+/platform/
+/cloud-extension-pack/
+gradle.properties
+hybris/config/local.properties
+hybris/config/solr/instances/default/configsets
+
+# developer-specific properties
+hybris/config/local-config/99-local.properties

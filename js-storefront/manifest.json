@@ -1,0 +1,6 @@
+{
+    "applications": [{
+        "name": "demoshop",
+        "path": "demoshop"
+    }]
+}
