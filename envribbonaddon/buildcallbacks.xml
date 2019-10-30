@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<project name="envribbonaddon_buildcallbacks">
+
+    <property name="badgeCss" value="${ext.envribbon.path}/resources/envribbon/envribbon.css" />
+    <property name="addonCss" value="${ext.envribbonaddon.path}/acceleratoraddon/web/webroot/_ui/responsive/common/css/envribbonaddon.css" />
+
+    <macrodef name="envribbonaddon_before_build">
+        <sequential>
+            <copy file="${badgeCss}" tofile="${addonCss}" overwrite="true"/>
+        </sequential>
+    </macrodef>
+</project>

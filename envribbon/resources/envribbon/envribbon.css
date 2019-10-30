@@ -1,0 +1,32 @@
+.mpern-env-ribbon {
+    z-index: 10000;
+
+    font-family: monospace;
+    font-size: 24px;
+    line-height: 1em;
+    text-transform: uppercase;
+    white-space: nowrap;
+
+    overflow: hidden;
+    position: absolute;
+    left: -6.5em;
+    top: 2em;
+    width: 20em;
+    transform: rotate(-45deg);
+
+    opacity: .7;
+    color: #e8e8e8;
+    box-shadow: 0 0 1em 0.5em rgba(0,0,0,0.75);
+
+    pointer-events: none;
+}
+.mpern-env-ribbon::before {
+    content: attr(data-environment);
+    display: block;
+    padding: 1em 2em;
+    font-weight: 800;
+    text-align: center;
+}
+.mpern-env-ribbon[data-type=development] { background-color: #a1b56c }
+.mpern-env-ribbon[data-type=staging] { background-color: #dc9656 }
+.mpern-env-ribbon[data-type=production] { background-color: #ab4642 }
