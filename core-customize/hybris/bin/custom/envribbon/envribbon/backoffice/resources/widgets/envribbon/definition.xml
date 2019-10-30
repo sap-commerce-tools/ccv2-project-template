@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<!--
+ [y] hybris Platform
+
+ Copyright (c) 2018 SAP SE or an SAP affiliate company.  All rights reserved.
+
+ This software is the confidential and proprietary information of SAP
+ ("Confidential Information"). You shall not disclose such Confidential
+ Information and shall use it only in accordance with the terms of the
+ license agreement you entered into with SAP.
+-->
+<widget-definition xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xsi:noNamespaceSchemaLocation="http://www.hybris.com/schema/cockpitng/widget-definition.xsd"
+                   id="mpern.sap.commerce.envribbon">
+    <name>Environment Ribbon</name>
+    <author>mpern</author>
+    <version>1.0</version>
+    <keywords>
+        <keyword>ribbon</keyword>
+        <keyword>environment</keyword>
+    </keywords>
+    <view src="envribbon.zul" />
+    <controller class="mpern.sap.commerce.ribbon.RibbonController" />
+</widget-definition>

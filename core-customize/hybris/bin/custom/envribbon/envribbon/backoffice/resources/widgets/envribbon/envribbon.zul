@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<widget xmlns="http://www.zkoss.org/2005/zul"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xmlns:h="http://www.w3.org/1999/xhtml"
+        xmlns:w="http://www.zkoss.org/2005/zk/client"
+        xmlns:zk="http://www.zkoss.org/2005/zk"
+        xmlns:ca="http://www.zkoss.org/2005/zk/client/attribute"
+        xsi:schemaLocation="http://www.zkoss.org/2005/zul http://www.hybris.com/schema/cockpitng/zul/zul.xsd"
+        height="100%">
+
+    <div id="envRibbon" ca:data-metaholder="meta"></div>
+    <n:script xmlns:n="native">
+        zk.afterMount(function () {
+            var meta = document.querySelector("[data-metaholder]");
+
+            if (meta.dataset.environment &amp;&amp; meta.dataset.type) {
+                var container = document.createElement("div");
+
+                container.id = 'mpern-env-ribbon';
+                container.classList.add("mpern-env-ribbon");
+                container.setAttribute("data-environment", meta.dataset.environment);
+                container.setAttribute("data-type", meta.dataset.type);
+
+                document.body.insertBefore(container, document.body.firstChild);
+            }
+        });
+    </n:script>
+</widget>

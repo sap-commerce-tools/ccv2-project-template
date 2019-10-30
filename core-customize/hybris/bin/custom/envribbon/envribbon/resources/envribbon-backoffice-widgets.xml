@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<widgets xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://www.hybris.com/schema/cockpitng/widgets.xsd">
+
+    <widget-extension widgetId="mainSlot">
+        <widget id="envribbon" widgetDefinitionId="mpern.sap.commerce.envribbon" slotId="headerArea" />
+    </widget-extension>
+
+</widgets>
