@@ -10,7 +10,7 @@ hybris/roles/
 hybris/log/
 hybris/temp/
 hybris/data/
-hybris/local-config
+hybris/config/local-config/99-local.properties
 
 # filter only custom extension
 hybris/bin/*

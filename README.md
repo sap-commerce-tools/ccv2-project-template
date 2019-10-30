@@ -1,10 +1,12 @@
 # CCv2 Template Repository
 
-- best-practice setup
-- based on `b2c_acc_plus` recipe
-- includes Spartacus storefront
-- fully automated setup for local development
-- docker-compose based setup for MS SQL, Azurite (for cloud hotfolder)
+- Best-practice setup
+- Based on `b2c_acc_plus` recipe
+- Includes Spartacus storefront
+- Fully automated setup for local development
+- [docker-compose](https://docs.docker.com/compose/)-based setup for:
+  - MS SQL
+  - [Azurite](https://github.com/Azure/Azurite) (for cloud hotfolder)
 
 For further details, check:
 
