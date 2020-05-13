@@ -1,8 +1,28 @@
-local webapp(extension, path=null) = {
-  name: extension,
-  contextPath: if path == null then '/' + extension else path,
+// find . -name 'extensioninfo.xml' | \
+// xargs xidel --silent --extract 'join((//extension/@name,//webmodule/@webroot))' | \
+// grep -v '^\(.\+\) /\1$' | grep '/'
+local nonstandard_context_paths = {
+  mediaweb: '/medias',
+  testweb: '/test',
+  oauth2: '/authorizationserver',
+  maintenanceweb: '/maintenance',
+  ycommercewebservices: '/rest',
+  scimwebservices: '/scim',
+  orbeonweb: '/web-orbeon',
 };
 
+local webapp(extension, path=null) = {
+  name: extension,
+  contextPath: if path == null then
+    if extension in nonstandard_context_paths then
+      nonstandard_context_paths[extension]
+    else
+      '/' + extension
+  else
+    path,
+};
+
+// CONFIGURE YOUR MANIFEST HERE
 local storefrontExtension = 'demoshopstorefront';
 local storefrontContextRoot = '';
 local storefrontAddons = [
@@ -36,6 +56,7 @@ local storefrontAddons = [
 ];
 
 local occExtension = 'ycommercewebservices';
+local occWebroot = '/rest';
 local occAddons = [
   'cmsoccaddon',
   'acceleratorwebservicesaddon',
@@ -46,8 +67,10 @@ local occAddons = [
 ];
 
 local smartEditWebapps = [
+  // Activating SmartEdit for a Storefront
   // https://help.sap.com/viewer/1be46286b36a4aa48205be5a96240672/SHIP/en-US/7d3f83250d9846518f4154cfb18ae051.html
-  webapp('oauth2', '/authorizationserver'),
+  // Default Smartedit webapps
+  webapp('oauth2'),
   webapp('smartedit'),
   webapp('cmssmartedit'),
   webapp('cmssmarteditwebservices'),
@@ -55,7 +78,7 @@ local smartEditWebapps = [
   webapp('cmswebservices'),
   webapp('permissionswebservices'),
   webapp('previewwebservices'),
-
+  // Smartedit personalization
   webapp('personalizationsmartedit'),
   webapp('personalizationwebservices'),
   webapp('personalizationsearchsmartedit'),
@@ -65,10 +88,14 @@ local smartEditWebapps = [
   webapp('merchandisingsmartedit'),
 ];
 
+// ------------ MANIFEST ------------
 {
   commerceSuiteVersion: '1905',
   useCloudExtensionPack: true,
   extensions: [
+    // modeltacceleratorservices is only available in CCv2 (not part of the cloud extension pack)
+    // -> configure it in manifest.json
+    // https://help.sap.com/viewer/0fa6bcf4736c46f78c248512391eb467/SHIP/en-US/b13c673497674994a7f243e3225af9b3.html
     'modeltacceleratorservices',
   ],
   useConfig: {
@@ -110,7 +137,7 @@ local smartEditWebapps = [
       name: 'backoffice',
       webapps: [
         webapp('hac'),
-        webapp('mediaweb', '/medias'),
+        webapp('mediaweb'),
         webapp('backoffice'),
         webapp('odata2webservices'),
       ] + smartEditWebapps,
@@ -120,9 +147,9 @@ local smartEditWebapps = [
       properties: [],
       webapps: [
         webapp(storefrontExtension, storefrontContextRoot),
-        webapp('mediaweb', '/medias'),
+        webapp('mediaweb'),
 
-        webapp('orbeonweb', '/web-orbeon'),
+        webapp('orbeonweb'),
         webapp('xyformsweb'),
       ],
     },
@@ -131,19 +158,19 @@ local smartEditWebapps = [
       properties: [],
       webapps: [
         webapp('hac'),
-        webapp('mediaweb', '/medias'),
+        webapp('mediaweb'),
       ],
     },
     {
       name: 'api',
       properties: [],
       webapps: [
-        webapp(occExtension, '/rest'),
-        // only necessaary for checkout/payment simulation?
+        webapp(occExtension, occWebroot),
+        // only necessary for checkout/payment mocks
         // https://help.sap.com/viewer/4c33bf189ab9409e84e589295c36d96e/1905/en-US/8abddeed86691014be559318fab13d44.html?q=acceleratorservices
         webapp('acceleratorservices'),
-        webapp('oauth2', '/authorizationserver'),
-        webapp('mediaweb', '/medias'),
+        webapp('oauth2'),
+        webapp('mediaweb'),
       ],
     },
   ],

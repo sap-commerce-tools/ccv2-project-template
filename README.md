@@ -8,8 +8,10 @@
   - MS SQL
   - [Azurite](https://github.com/Azure/Azurite) (for cloud hotfolder)
 
-For further details, check:
+## SAP Commerce Setup
 
 [core-customize/README.md](core-customize/README.md)
+
+## Spartacus Setup
 
 [js-storefront/demoshop/README.md](js-storefront/demoshop/README.md)

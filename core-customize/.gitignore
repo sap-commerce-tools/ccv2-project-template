@@ -12,7 +12,7 @@ hybris/temp/
 hybris/data/
 hybris/config/local-config/99-local.properties
 
-# filter only custom extension
+# only allow custom extension
 hybris/bin/*
 !hybris/bin/custom/
  
