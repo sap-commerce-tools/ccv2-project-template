@@ -6,15 +6,16 @@ services:
     ports:
       - "1433:1433"
     environment:
-      SA_PASSWORD: "Hybris!nimda"
-      ACCEPT_EULA: "Y"
-    # volumes:
-    #  - mssqldb-vol:/var/opt/mssql
+      - SA_PASSWORD=localSAPassw0rd
+      - ACCEPT_EULA=ok
   mssqlinit:
     image: "mcr.microsoft.com/mssql-tools"
     volumes: 
       - resources_vol:/tmp/resources
-    command: /tmp/resources/wait-for-it/wait-for-it.sh -t 120 mssql:1433 -- bash -c "/opt/mssql-tools/bin/sqlcmd -S mssql -U sa -P "Hybris!nimda" -i /tmp/resources/db_init.sql"
+    command: bash -c "set -e; cd /tmp/resources && bash configure-db.sh"
+    environment:
+      - SQLSERVER=mssql
+      - SA_PASSWORD=localSAPassw0rd
     depends_on:
       - mssql
   azurite:
@@ -31,4 +32,3 @@ volumes:
       o: bind
 #   mssqldb-vol:
 #   azurite-store:
-
