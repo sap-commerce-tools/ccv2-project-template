@@ -1,6 +1,6 @@
 plugins {
-    id("mpern.sap.commerce.build") version("2.0.0")
-    id("mpern.sap.commerce.build.ccv2") version("2.0.0")
+    id("sap.commerce.build") version("3.0.0")
+    id("sap.commerce.build.ccv2") version("3.0.0")
 }
 import mpern.sap.commerce.build.tasks.HybrisAntTask
 import org.apache.tools.ant.taskdefs.condition.Os
