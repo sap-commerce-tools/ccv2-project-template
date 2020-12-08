@@ -6,8 +6,8 @@ local nonstandard_context_paths = {
   testweb: '/test',
   oauth2: '/authorizationserver',
   maintenanceweb: '/maintenance',
+  commercewebservices: '/occ',
   ycommercewebservices: '/rest',
-  scimwebservices: '/scim',
   orbeonweb: '/web-orbeon',
 };
 
@@ -26,44 +26,40 @@ local webapp(extension, path=null) = {
 local storefrontExtension = 'demoshopstorefront';
 local storefrontContextRoot = '';
 local storefrontAddons = [
-  'captchaaddon',
-  'commerceorgsamplesaddon',
-  'promotionenginesamplesaddon',
-  'assistedservicestorefront',
-  'assistedservicecustomerinterestsaddon',
-  'assistedserviceyprofileaddon',
-  'assistedservicepromotionaddon',
-  'customerticketingaddon',
-  'textfieldconfiguratortemplateaddon',
-  'smarteditaddon',
-  'consignmenttrackingaddon',
-  'notificationaddon',
-  'customerinterestsaddon',
-  'stocknotificationaddon',
-  'orderselfserviceaddon',
   'adaptivesearchsamplesaddon',
+  'assistedservicecustomerinterestsaddon',
+  'assistedservicepromotionaddon',
+  'assistedservicestorefront',
+  'assistedserviceyprofileaddon',
+  'captchaaddon',
   'configurablebundleaddon',
-  'pcmbackofficesamplesaddon',
-  'xyformssamples',
-  'xyformsstorefrontcommons',
-  'personalizationsearchsamplesaddon',
-  'personalizationyprofilesampledataaddon',
-  'personalizationaddon',
-  'profiletagaddon',
+  'consignmenttrackingaddon',
+  'customercouponaddon',
+  'customercouponsamplesaddon',
+  'customerinterestsaddon',
+  'customerticketingaddon',
+  'eventtrackingwsaddon',
   'merchandisingaddon',
   'merchandisingstorefrontsampledataaddon',
-  'spartacussampledataaddon',
-];
-
-local occExtension = 'ycommercewebservices';
-local occWebroot = '/rest';
-local occAddons = [
-  'cmsoccaddon',
-  'acceleratorwebservicesaddon',
-
-  'consignmenttrackingoccaddon',
-  'customerinterestsoccaddon',
-  'notificationoccaddon',
+  'multicountrysampledataaddon',
+  'notificationaddon',
+  'ordermanagementaddon',
+  'orderselfserviceaddon',
+  'pcmbackofficesamplesaddon',
+  'personalizationaddon',
+  'personalizationsampledataaddon',
+  'personalizationyprofilesampledataaddon',
+  'profiletagaddon',
+  'selectivecartsplitlistaddon',
+  'smarteditaddon',
+  'stocknotificationaddon',
+  'textfieldconfiguratortemplateaddon',
+  'timedaccesspromotionengineaddon',
+  'timedaccesspromotionenginesamplesaddon',
+  'xyformssamples',
+  'xyformsstorefrontcommons',
+  'ysapproductconfigaddon',
+  'spartacussampledataaddon'
 ];
 
 local smartEditWebapps = [
@@ -83,6 +79,13 @@ local smartEditWebapps = [
   webapp('personalizationwebservices'),
   webapp('personalizationsearchsmartedit'),
   webapp('personalizationpromotionssmartedit'),
+  // Smartedit personalization promotion
+  webapp('personalizationpromotionssmartedit'),
+  // Smartedit personalization search
+  webapp('personalizationsearchsmartedit'),
+  // Smartedit promotion
+  webapp('merchandisingsmartedit'),
+  webapp('merchandisingcmswebservices'),
 
   // https://help.sap.com/viewer/50c996852b32456c96d3161a95544cdb/1905/en-US/b21fa18f635d49eaa4d9ce5997a6a814.html
   webapp('merchandisingsmartedit'),
@@ -90,8 +93,8 @@ local smartEditWebapps = [
 
 // ------------ MANIFEST ------------
 {
-  commerceSuiteVersion: '1905',
-  useCloudExtensionPack: true,
+  commerceSuiteVersion: '2011',
+  useCloudExtensionPack: false,
   extensions: [
     // modeltacceleratorservices is only available in CCv2 (not part of the cloud extension pack)
     // -> configure it in manifest.json
@@ -128,9 +131,6 @@ local smartEditWebapps = [
   storefrontAddons: [
     { addon: addon, storefront: storefrontExtension, template: 'yacceleratorstorefront' }
     for addon in storefrontAddons
-  ] + [
-    { addon: addon, storefront: occExtension, template: 'ycommercewebservices' }
-    for addon in occAddons
   ],
   aspects: [
     {
@@ -165,7 +165,7 @@ local smartEditWebapps = [
       name: 'api',
       properties: [],
       webapps: [
-        webapp(occExtension, occWebroot),
+        webapp('commercewebservices'),
         // only necessary for checkout/payment mocks
         // https://help.sap.com/viewer/4c33bf189ab9409e84e589295c36d96e/1905/en-US/8abddeed86691014be559318fab13d44.html?q=acceleratorservices
         webapp('acceleratorservices'),

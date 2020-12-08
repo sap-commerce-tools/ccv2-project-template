@@ -102,6 +102,47 @@ tasks.register<HybrisAntTask>("generateDemoStorefront") {
     antProperty("input.package", "com.demo.shop")
 }
 
+// ant extgen -Dinput.template=yacceleratorordermanagement -Dinput.name=demoshopordermanagement -Dinput.package=com.demo.shop.ordermanagement
+tasks.register<HybrisAntTask>("generateDemoOrderManagment") {
+    dependsOn("bootstrapPlatform", "createDefaultConfig")
+
+    args("extgen")
+    antProperty("input.template", "yacceleratorordermanagement")
+    antProperty("input.name", "demoshopordermanagement")
+    antProperty("input.package", "com.demo.shop.ordermanagement")
+}
+
+// ant extgen -Dinput.template=yocc -Dinput.name=demoshopocc -Dinput.package=com.demo.shop.occ
+tasks.register<HybrisAntTask>("generateDemoOcc") {
+    dependsOn("bootstrapPlatform", "createDefaultConfig")
+
+    args("extgen")
+    antProperty("input.template", "yocc")
+    antProperty("input.name", "demoshopocc")
+    antProperty("input.package", "com.demo.shop.occ")
+}
+
+// ant extgen -Dinput.template=yocc -Dinput.name=demoshopocc -Dinput.package=com.demo.shop.occ.tests
+tasks.register<HybrisAntTask>("generateDemoOccTests") {
+    dependsOn("bootstrapPlatform", "createDefaultConfig")
+
+    args("extgen")
+    antProperty("input.template", "yocctests")
+    antProperty("input.name", "demoshopocctests")
+    antProperty("input.package", "com.demo.shop.occ.tests")
+}
+
 tasks.register("generateProprietaryCode") {
-    dependsOn("generateDemoStorefront")
+    dependsOn("generateDemoStorefront", "generateDemoOrderManagment", "generateDemoOcc", "generateDemoOccTests")
+    doLast {
+        ant.withGroovyBuilder {
+            "move"("file" to "hybris/bin/custom/demoshopordermanagement", "todir" to "hybris/bin/custom/demoshop")
+        }
+        ant.withGroovyBuilder {
+            "move"("file" to "hybris/bin/custom/demoshopocc", "todir" to "hybris/bin/custom/demoshop")
+        }
+        ant.withGroovyBuilder {
+            "move"("file" to "hybris/bin/custom/demoshopocctests", "todir" to "hybris/bin/custom/demoshop")
+        }
+    }
 }
