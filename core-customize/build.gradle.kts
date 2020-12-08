@@ -22,7 +22,7 @@ tasks.named("installManifestAddons") {
 }
 
 tasks.register("setupLocalDevelopment") {
-    dependsOn("bootstrapPlatform", generateLocalProperties, "installManifestAddons")
+    dependsOn("bootstrapPlatform", generateLocalProperties, "installManifestAddons", "symlinkSolrConfigForLocalDevelopment")
 }
 
 // ---------------------------------------------------
@@ -31,26 +31,16 @@ tasks.register("setupLocalDevelopment") {
 // *Those are only necessary because I don't want to add any properietary files owned by SAP to Github.*
 // For a regular project, just commit the config folder and your custom extensions (hybris/bin/custom) as usual!
 
-// ant modulegen -Dinput.module=accelerator -Dinput.name=demoshop -Dinput.package=com.demo.shop
-tasks.register<HybrisAntTask>("generateDemoStorefront") {
-    dependsOn("bootstrapPlatform", "createDefaultConfig")
-
-    args("modulegen")
-    antProperty("input.module", "accelerator")
-    antProperty("input.name", "demoshop")
-    antProperty("input.package", "com.demo.shop")
-}
-
 // setup hybris/config folder
 tasks.register<Copy>("mergeConfigFolder") {
-    dependsOn("generateDemoStorefront")
+    dependsOn("bootstrapPlatform", "createDefaultConfig")
 
     from("hybris/config-template")
     into("hybris/config")
 }
 tasks.register<Exec>("symlinkCommonProperties") {
     dependsOn("mergeConfigFolder")
-     if (Os.isFamily(Os.FAMILY_UNIX)) {
+    if (Os.isFamily(Os.FAMILY_UNIX)) {
         commandLine("sh", "-c", "ln -s ../environments/common.properties 10-local.properties")
     } else {
         // https://blogs.windows.com/windowsdeveloper/2016/12/02/symlinks-windows-10/
@@ -69,18 +59,16 @@ tasks.register<Exec>("symlinkLocalDevProperties") {
     workingDir("hybris/config/local-config")
 }
 tasks.named("generateLocalProperties") {
-    mustRunAfter("mergeConfigFolder")
     dependsOn("symlinkCommonProperties", "symlinkLocalDevProperties")
 }
 
 // starting and stopping solr generates the default solr configuration
 tasks.register<HybrisAntTask>("startSolr") {
-    dependsOn("mergeConfigFolder", "generateLocalProperties")
     args("startSolrServers")
 }
 tasks.register<HybrisAntTask>("stopSolr") {
     args("stopSolrServers")
-        mustRunAfter("startSolr")
+    mustRunAfter("startSolr")
 }
 tasks.register("startStopSolr") {
     dependsOn("startSolr", "stopSolr")
@@ -104,6 +92,16 @@ tasks.register<Exec>("symlinkSolrConfigForLocalDevelopment") {
     workingDir("hybris/config/solr/instances/cloud")
 }
 
+// ant modulegen -Dinput.module=accelerator -Dinput.name=demoshop -Dinput.package=com.demo.shop
+tasks.register<HybrisAntTask>("generateDemoStorefront") {
+    dependsOn("bootstrapPlatform", "createDefaultConfig")
+
+    args("modulegen")
+    antProperty("input.module", "accelerator")
+    antProperty("input.name", "demoshop")
+    antProperty("input.package", "com.demo.shop")
+}
+
 tasks.register("generateProprietaryCode") {
-    dependsOn("symlinkSolrConfigForLocalDevelopment")
+    dependsOn("generateDemoStorefront")
 }
