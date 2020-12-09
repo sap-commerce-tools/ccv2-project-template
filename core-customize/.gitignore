@@ -1,7 +1,8 @@
 # Folders to ignore, whatever the place they are
- 
+.DS_Store
 .metadata
 classes
+testclasses
 eclipsebin
 gensrc
 
@@ -52,11 +53,15 @@ base.properties
 **/tld/addons
 **/tags/addons
 **/messages/addons
+**/lib/addons
 **/web/addonsrc
 **/_ui-src/addons
 **/web/addontestsrc
 **/web/commonwebsrc/*/
+**/web/webroot/WEB-INF/lib/addon-*
+wro_addons.xml
 
+# Backoffice artifacts
 *_bof.jar
 
 # project ignore
