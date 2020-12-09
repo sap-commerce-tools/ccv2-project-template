@@ -4,10 +4,9 @@ A [Spartacus][spartacus]-based demo storefront ([built from libraries][libraries
 
 - Configuration for "SAP Commerce in the Public Cloud" (aka CCv2) (including the [Smartedit setup][smartedit])
 - [Recommended developer settings][developer] for [VS Code][code]
-- Streamlined OCC settings (check [`src/environments`](src/environments) and [`app.module.ts`](src/app/app.module.ts#L11-L16))
-- Minor tweaks to package.json:
+- Streamlined OCC settings (check [`src/environments`](src/environments) and [`app.module.ts`](src/app/app.module.ts#L11-L16)) and SAP/spartacus/issues#5886
+- Minor tweaks to `package.json`:
   - run production build on `yarn build` (see [Updating the Code Repository for JavaScript Storefronts][build])
-  - Start http*s* development server on `yarn start`, to avoid any insecure/mixed content errors in the browsers
 
 [spartacus]: https://github.com/SAP/cloud-commerce-spartacus-storefront
 [libraries]: https://sap.github.io/cloud-commerce-spartacus-storefront-docs/building-the-spartacus-storefront-from-libraries/
@@ -21,7 +20,7 @@ A [Spartacus][spartacus]-based demo storefront ([built from libraries][libraries
 - You have to copy the `webApplicationInjector.js` from SAP Commerce and add it to the project (I want to avoid any copyright troubles). Assuming the default project layout for CCv2, this should do the trick:
 
   ```bash
-  cp ../../core-customize/hybris/bin/modules/smartedit/smarteditaddon/acceleratoraddon/web/webroot/_ui/shared/common/js/webApplicationInjector.js src/
+  cp ../../core-customize/hybris/bin/modules/smartedit/smarteditaddon/acceleratoraddon/web/webroot/_ui/shared/common/js/webApplicationInjector.js src/assets
   ```
 
 - \[optional\] Restrict Smartedit to your CCv2 subscription by changing the value of `data-smartedit-allow-origin` in [`src/index.html`](src/index.html#L13). \
