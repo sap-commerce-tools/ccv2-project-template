@@ -20,7 +20,7 @@
         "build": {
           "builder": "@angular-devkit/build-angular:browser",
           "options": {
-            "outputPath": "dist/demoshop/browser",
+            "outputPath": "dist/demoshop",
             "index": "src/index.html",
             "main": "src/main.ts",
             "polyfills": "src/polyfills.ts",
@@ -132,7 +132,7 @@
         "server": {
           "builder": "@angular-devkit/build-angular:server",
           "options": {
-            "outputPath": "dist/demoshop/server",
+            "outputPath": "dist/demoshop-server",
             "main": "server.ts",
             "tsConfig": "tsconfig.server.json"
           },

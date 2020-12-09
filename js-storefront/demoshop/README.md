@@ -7,6 +7,7 @@ A [Spartacus][spartacus]-based demo storefront ([built from libraries][libraries
 - Streamlined OCC settings (check [`src/environments`](src/environments) and [`app.module.ts`](src/app/app.module.ts#L11-L16)) and SAP/spartacus/issues#5886
 - Minor tweaks to `package.json`:
   - run production build on `yarn build` (see [Updating the Code Repository for JavaScript Storefronts][build])
+- Includes the [SSR workaround][ssr]
 
 [spartacus]: https://github.com/SAP/cloud-commerce-spartacus-storefront
 [libraries]: https://sap.github.io/cloud-commerce-spartacus-storefront-docs/building-the-spartacus-storefront-from-libraries/
@@ -14,6 +15,7 @@ A [Spartacus][spartacus]-based demo storefront ([built from libraries][libraries
 [code]: https://code.visualstudio.com/
 [build]: https://help.sap.com/viewer/1be46286b36a4aa48205be5a96240672/SHIP/en-US/63577f67a67347bf9f4765a5385ead33.html
 [smartedit]: https://sap.github.io/cloud-commerce-spartacus-storefront-docs/smartEdit-setup-instructions-for-spartacus/
+[ssr]: https://sap.github.io/spartacus-docs/ssr-ccv2-issue-spartacus-version-2/
 
 ## Notes
 

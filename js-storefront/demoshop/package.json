@@ -10,7 +10,7 @@
     "e2e": "ng e2e",
     "dev:ssr": "ng run demoshop:serve-ssr",
     "serve:ssr": "node dist/demoshop/server/main.js",
-    "build:ssr": "ng build --prod && ng run demoshop:server:production",
+    "build:ssr": "ng build --prod && ng run demoshop:server:production && mv dist/demoshop-server/main.js dist/server.js || move dist\\demoshop-server\\main.js dist\\server.js",
     "prerender": "ng run demoshop:prerender"
   },
   "private": true,
