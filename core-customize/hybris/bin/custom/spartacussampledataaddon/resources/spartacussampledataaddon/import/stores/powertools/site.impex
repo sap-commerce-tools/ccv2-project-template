@@ -21,9 +21,12 @@ $customSiteMapUrls=/Open-Catalogue/c/1?q=%3AtopRated%3AallPromotions%3ABOGOFpowe
 $fullPathpowertools=https://localhost:4200
 $language=en
 
+$urlPatterns=(?i)^https?://[^/]+(/[^?]*)?\?(.*\&)?(site=$spaSiteUid)(|\&.*)$,(?i)^https?://$spaSiteUid\.[^/]+(|/.*|\?.*)$,(?i)^https?://api\.hybrisdev\.com(:[\d]+)?/rest/.*$,(?i)^https?://localhost(:[\d]+)?/rest/.*$
+$urlEncodingAttributes=language,currency
+
 ### Site for spartacus
 INSERT_UPDATE CMSSite;uid[unique=true];theme(code);channel(code);stores(uid);contentCatalogs(id);defaultCatalog(id);defaultLanguage(isoCode);siteMapConfig(configId);urlPatterns;active;previewURL;startingPage(uid,$spaContentCV);urlEncodingAttributes;defaultPromotionGroup(Identifier)[default=powertoolsPromoGrp]
-;$spaSiteUid;;B2B;$storeUid;$spaContentCatalog;$productCatalog;$language;powertoolsSiteMapConfig;;true;$fullPathpowertools;homepage
+;$spaSiteUid;;B2B;$storeUid;$spaContentCatalog;$productCatalog;$language;powertoolsSiteMapConfig;$urlPatterns;true;$fullPathpowertools/$spaSiteUid;homepage;$urlEncodingAttributes
 
 UPDATE CMSSite;uid[unique=true];name[lang=$language]
 ;$spaSiteUid;"Spartacus powertools Site"

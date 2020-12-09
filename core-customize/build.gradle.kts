@@ -1,6 +1,6 @@
 plugins {
-    id("mpern.sap.commerce.build") version("2.0.0")
-    id("mpern.sap.commerce.build.ccv2") version("2.0.0")
+    id("sap.commerce.build") version("3.0.0")
+    id("sap.commerce.build.ccv2") version("3.0.0")
 }
 import mpern.sap.commerce.build.tasks.HybrisAntTask
 import org.apache.tools.ant.taskdefs.condition.Os
@@ -22,7 +22,7 @@ tasks.named("installManifestAddons") {
 }
 
 tasks.register("setupLocalDevelopment") {
-    dependsOn("bootstrapPlatform", generateLocalProperties, "installManifestAddons")
+    dependsOn("bootstrapPlatform", generateLocalProperties, "installManifestAddons", "symlinkSolrConfigForLocalDevelopment")
 }
 
 // ---------------------------------------------------
@@ -31,26 +31,16 @@ tasks.register("setupLocalDevelopment") {
 // *Those are only necessary because I don't want to add any properietary files owned by SAP to Github.*
 // For a regular project, just commit the config folder and your custom extensions (hybris/bin/custom) as usual!
 
-// ant modulegen -Dinput.module=accelerator -Dinput.name=demoshop -Dinput.package=com.demo.shop
-tasks.register<HybrisAntTask>("generateDemoStorefront") {
-    dependsOn("bootstrapPlatform", "createDefaultConfig")
-
-    args("modulegen")
-    antProperty("input.module", "accelerator")
-    antProperty("input.name", "demoshop")
-    antProperty("input.package", "com.demo.shop")
-}
-
 // setup hybris/config folder
 tasks.register<Copy>("mergeConfigFolder") {
-    dependsOn("generateDemoStorefront")
+    dependsOn("bootstrapPlatform", "createDefaultConfig")
 
     from("hybris/config-template")
     into("hybris/config")
 }
 tasks.register<Exec>("symlinkCommonProperties") {
     dependsOn("mergeConfigFolder")
-     if (Os.isFamily(Os.FAMILY_UNIX)) {
+    if (Os.isFamily(Os.FAMILY_UNIX)) {
         commandLine("sh", "-c", "ln -s ../environments/common.properties 10-local.properties")
     } else {
         // https://blogs.windows.com/windowsdeveloper/2016/12/02/symlinks-windows-10/
@@ -69,18 +59,16 @@ tasks.register<Exec>("symlinkLocalDevProperties") {
     workingDir("hybris/config/local-config")
 }
 tasks.named("generateLocalProperties") {
-    mustRunAfter("mergeConfigFolder")
     dependsOn("symlinkCommonProperties", "symlinkLocalDevProperties")
 }
 
 // starting and stopping solr generates the default solr configuration
 tasks.register<HybrisAntTask>("startSolr") {
-    dependsOn("mergeConfigFolder", "generateLocalProperties")
     args("startSolrServers")
 }
 tasks.register<HybrisAntTask>("stopSolr") {
     args("stopSolrServers")
-        mustRunAfter("startSolr")
+    mustRunAfter("startSolr")
 }
 tasks.register("startStopSolr") {
     dependsOn("startSolr", "stopSolr")
@@ -104,6 +92,57 @@ tasks.register<Exec>("symlinkSolrConfigForLocalDevelopment") {
     workingDir("hybris/config/solr/instances/cloud")
 }
 
+// ant modulegen -Dinput.module=accelerator -Dinput.name=demoshop -Dinput.package=com.demo.shop
+tasks.register<HybrisAntTask>("generateDemoStorefront") {
+    dependsOn("bootstrapPlatform", "createDefaultConfig")
+
+    args("modulegen")
+    antProperty("input.module", "accelerator")
+    antProperty("input.name", "demoshop")
+    antProperty("input.package", "com.demo.shop")
+}
+
+// ant extgen -Dinput.template=yacceleratorordermanagement -Dinput.name=demoshopordermanagement -Dinput.package=com.demo.shop.ordermanagement
+tasks.register<HybrisAntTask>("generateDemoOrderManagment") {
+    dependsOn("bootstrapPlatform", "createDefaultConfig")
+
+    args("extgen")
+    antProperty("input.template", "yacceleratorordermanagement")
+    antProperty("input.name", "demoshopordermanagement")
+    antProperty("input.package", "com.demo.shop.ordermanagement")
+}
+
+// ant extgen -Dinput.template=yocc -Dinput.name=demoshopocc -Dinput.package=com.demo.shop.occ
+tasks.register<HybrisAntTask>("generateDemoOcc") {
+    dependsOn("bootstrapPlatform", "createDefaultConfig")
+
+    args("extgen")
+    antProperty("input.template", "yocc")
+    antProperty("input.name", "demoshopocc")
+    antProperty("input.package", "com.demo.shop.occ")
+}
+
+// ant extgen -Dinput.template=yocc -Dinput.name=demoshopocc -Dinput.package=com.demo.shop.occ.tests
+tasks.register<HybrisAntTask>("generateDemoOccTests") {
+    dependsOn("bootstrapPlatform", "createDefaultConfig")
+
+    args("extgen")
+    antProperty("input.template", "yocctests")
+    antProperty("input.name", "demoshopocctests")
+    antProperty("input.package", "com.demo.shop.occ.tests")
+}
+
 tasks.register("generateProprietaryCode") {
-    dependsOn("symlinkSolrConfigForLocalDevelopment")
+    dependsOn("generateDemoStorefront", "generateDemoOrderManagment", "generateDemoOcc", "generateDemoOccTests")
+    doLast {
+        ant.withGroovyBuilder {
+            "move"("file" to "hybris/bin/custom/demoshopordermanagement", "todir" to "hybris/bin/custom/demoshop")
+        }
+        ant.withGroovyBuilder {
+            "move"("file" to "hybris/bin/custom/demoshopocc", "todir" to "hybris/bin/custom/demoshop")
+        }
+        ant.withGroovyBuilder {
+            "move"("file" to "hybris/bin/custom/demoshopocctests", "todir" to "hybris/bin/custom/demoshop")
+        }
+    }
 }

@@ -20,10 +20,15 @@ $customSiteMapUrls=/Open-Catalogue/c/1?q=%3AtopRated%3AallPromotions%3ABOGOFElec
 
 $fullPathElectronics=https://localhost:4200
 $language=en
+$currency=USD
+
+### The last url pattern below is a wildcard for http(s)://localhost.* and should not be used in other sites than `electronics-spa`
+$urlPatterns=(?i)^https?://[^/]+(/[^?]*)?\?(.*\&)?(site=$spaSiteUid)(|\&.*)$,(?i)^https?://$spaSiteUid\.[^/]+(|/.*|\?.*)$,(?i)^https?://api\.hybrisdev\.com(:[\d]+)?/rest/.*$,(?i)^https?://localhost(:[\d]+)?/rest/.*$,(?i)^https?://localhost(:[\d]+)?(|/.*|\?.*)$
+$urlEncodingAttributes=language,currency
 
 ### Site for spartacus
 INSERT_UPDATE CMSSite;uid[unique=true];theme(code);channel(code);stores(uid);contentCatalogs(id);defaultCatalog(id);defaultLanguage(isoCode);siteMapConfig(configId);urlPatterns;active;previewURL;startingPage(uid,$spaContentCV);urlEncodingAttributes;defaultPromotionGroup(Identifier)[default=electronicsPromoGrp]
-;$spaSiteUid;;B2C;$storeUid;$spaContentCatalog;$productCatalog;$language;electronicsSiteMapConfig;;true;$fullPathElectronics;homepage
+;$spaSiteUid;;B2C;$storeUid;$spaContentCatalog;$productCatalog;$language;electronicsSiteMapConfig;$urlPatterns;true;$fullPathElectronics/$spaSiteUid/$language/$currency;homepage;$urlEncodingAttributes
 
 UPDATE CMSSite;uid[unique=true];name[lang=$language]
 ;$spaSiteUid;"Spartacus Electronics Site"
