@@ -1,6 +1,6 @@
 plugins {
-    id("mpern.sap.commerce.build") version("2.0.0")
-    id("mpern.sap.commerce.build.ccv2") version("2.0.0")
+    id("sap.commerce.build") version("3.0.0")
+    id("sap.commerce.build.ccv2") version("3.0.0")
 }
 import mpern.sap.commerce.build.tasks.HybrisAntTask
 import org.apache.tools.ant.taskdefs.condition.Os
@@ -26,10 +26,8 @@ tasks.register("setupLocalDevelopment") {
 }
 
 // ---------------------------------------------------
-
 // Helper tasks to boostrap the project from scratch.
 // *Those are only necessary because I don't want to add any properietary files owned by SAP to Github.*
-// For a regular project, just commit the config folder and your custom extensions (hybris/bin/custom) as usual!
 
 // ant modulegen -Dinput.module=accelerator -Dinput.name=demoshop -Dinput.package=com.demo.shop
 tasks.register<HybrisAntTask>("generateDemoStorefront") {
@@ -43,7 +41,7 @@ tasks.register<HybrisAntTask>("generateDemoStorefront") {
 
 // setup hybris/config folder
 tasks.register<Copy>("mergeConfigFolder") {
-    dependsOn("generateDemoStorefront")
+    mustRunAfter("generateDemoStorefront")
 
     from("hybris/config-template")
     into("hybris/config")
@@ -51,7 +49,7 @@ tasks.register<Copy>("mergeConfigFolder") {
 tasks.register<Exec>("symlinkCommonProperties") {
     dependsOn("mergeConfigFolder")
      if (Os.isFamily(Os.FAMILY_UNIX)) {
-        commandLine("sh", "-c", "ln -s ../environments/common.properties 10-local.properties")
+        commandLine("sh", "-c", "ln -sfn ../environments/common.properties 10-local.properties")
     } else {
         // https://blogs.windows.com/windowsdeveloper/2016/12/02/symlinks-windows-10/
         commandLine("cmd", "/c", """mklink /d "10-local.properties" "..\\environments\\common.properties" """)
@@ -61,7 +59,7 @@ tasks.register<Exec>("symlinkCommonProperties") {
 tasks.register<Exec>("symlinkLocalDevProperties") {
     dependsOn("mergeConfigFolder")
      if (Os.isFamily(Os.FAMILY_UNIX)) {
-        commandLine("sh", "-c", "ln -s ../environments/local-dev.properties 50-local.properties")
+        commandLine("sh", "-c", "ln -sfn ../environments/local-dev.properties 50-local.properties")
     } else {
         // https://blogs.windows.com/windowsdeveloper/2016/12/02/symlinks-windows-10/
         commandLine("cmd", "/c", """mklink /d "50-local.properties" "..\\environments\\local-dev.properties" """)
@@ -105,5 +103,5 @@ tasks.register<Exec>("symlinkSolrConfigForLocalDevelopment") {
 }
 
 tasks.register("generateProprietaryCode") {
-    dependsOn("symlinkSolrConfigForLocalDevelopment")
+    dependsOn("generateDemoStorefront", "symlinkSolrConfigForLocalDevelopment")
 }
