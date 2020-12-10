@@ -1,0 +1,13 @@
+$oneDay = 86400
+INSERT FlexibleSearchRetentionRule; code[unique = true]   ; searchQuery; retentionTimeSeconds; actionReference          ;
+                                  ; storedHttpSessionRule ; "select {s:pk}, {s:itemtype}
+   from {StoredHttpSession as s}
+   where
+   {s:modifiedTime} < ?CALC_RETIREMENT_TIME"                           ; $oneDay             ; basicRemoveCleanupAction ;
+INSERT RetentionJob; code[unique = true]         ; retentionRule(code)   ; batchSize
+                   ; storedHttpSessionCleanupJob ; storedHttpSessionRule ; 1000
+INSERT CronJob; code[unique = true]             ; job(code)                   ; sessionLanguage(isoCode)[default = en]
+              ; storedHttpSessionCleanupCronJob ; storedHttpSessionCleanupJob ;
+INSERT Trigger; cronJob(code)[unique = true]    ; cronExpression
+# every 30 minutes
+              ; storedHttpSessionCleanupCronJob ; 0 0/30 * * * ?

@@ -1,0 +1,31 @@
+# based on de.hybris.platform.commercewebservices.core.cronjob.OldCartRemovalJob
+# and de.hybris.platform.commerceservices.order.dao.impl.DefaultCommerceCartDao.getCartsForRemovalForSiteAndUser
+#
+# - cleanup anonymous carts after two weeks for *every* site (excluding saved carts)
+# - cleanup carts of registered users after four weeks for *every* site (excluding saved carts)
+$twoWeeks = 1209600
+$fourWeeks = 2419200
+INSERT FlexibleSearchRetentionRule; code[unique = true]; searchQuery; retentionTimeSeconds; actionReference          ;
+                                  ; cartRule           ; "select {c:pk}, {c:itemtype}
+   from {Cart as c LEFT JOIN User as u on {c:user} = {u:pk}}
+   where
+   {c:saveTime} IS NULL AND
+   {u:uid} <> 'anonymous' AND
+   {c:modifiedTime} < ?CALC_RETIREMENT_TIME"                        ; $fourWeeks          ; basicRemoveCleanupAction ;
+                                  ; anonymousCartRule  ; "select {c:pk}, {c:itemtype}
+   from {Cart as c LEFT JOIN User as u on {c:user} = {u:pk}}
+   where
+   {c:saveTime} IS NULL AND
+   ( {u:uid} = 'anonymous' OR {u:uid} IS NULL ) AND
+   {c:modifiedTime} < ?CALC_RETIREMENT_TIME"                        ; $twoWeeks           ; basicRemoveCleanupAction ;
+
+INSERT RetentionJob; code[unique = true]     ; retentionRule(code); batchSize
+                   ; cartCleanupJob          ; cartRule           ; 1000
+                   ; anonymousCartCleanupJob ; anonymousCartRule  ; 1000
+INSERT CronJob; code[unique = true]         ; job(code)               ; sessionLanguage(isoCode)[default = en]
+              ; cartCleanupCronJob          ; cartCleanupJob          ;
+              ; anonymousCartCleanupCronJob ; anonymousCartCleanupJob ;
+INSERT Trigger; cronJob(code)[unique = true]; cronExpression
+# every day at midnight
+              ; cartCleanupCronJob          ; 0 0 0 * * ?
+              ; anonymousCartCleanupCronJob ; 0 0 0 * * ?

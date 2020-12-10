@@ -1,0 +1,21 @@
+# ---------------------------------------------------------------------------
+# Copyright (c) 2019 SAP SE or an SAP affiliate company. All rights reserved.
+# ---------------------------------------------------------------------------
+# ref. https://launchpad.support.sap.com/#/notes/2848601
+# using INSERT ensures we import this only once, and only if the item(s) don't exist
+
+# RETENTION RULE for cleaning up cron job history items
+INSERT FlexibleSearchRetentionRule;code[unique=true];searchQuery;actionReference;
+; cronJobHistoryRetentionRule; SELECT {h1:PK}, {h1:itemtype} FROM {CronJobHistory as h1} WHERE {h1:creationtime} < (SELECT max FROM ({{SELECT max({h2:creationtime}) as max, {h2:cronjob} as cronjob FROM {CronJobHistory as h2} GROUP BY {h2:cronjob} }}) temptable where cronjob = {h1:cronjob}); basicRemoveCleanupAction;
+
+# JOB
+INSERT RetentionJob; code[unique=true]; retentionRule(code); batchSize
+; cronJobHistoryRetentionJob; cronJobHistoryRetentionRule; 1000
+
+# CRON JOB
+INSERT CronJob;code[unique=true]; job(code); sessionLanguage(isoCode)[default=en]
+; cronJobHistoryRetentionCronJob; cronJobHistoryRetentionJob;
+
+INSERT Trigger; cronJob(code)[unique=true]; cronExpression
+# every your
+;cronJobHistoryRetentionCronJob; 0 0 0/1 * * ? ;
