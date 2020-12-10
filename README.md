@@ -2,8 +2,7 @@
 
 - Best-practice setup
 - Based on SAP Commerce 2011
-- Based on `cx` recipe
-- Generates Demo B2C accelerator modules, OCC, OCC Tests and Order Management extensions
+- Generates Demo B2C accelerator modules, OCC extension and OCC tests extension
 - Includes Spartacus storefront
 - Fully automated setup for local development
 - [docker-compose](https://docs.docker.com/compose/)-based setup for:

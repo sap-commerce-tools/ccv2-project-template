@@ -13,6 +13,7 @@ UPDATE CMSSite;uid[unique=true];previewURL;
 INSERT_UPDATE SmartEditConfiguration;key[unique=true];value
 ;whiteListedStorefronts;"[
   ""https://localhost:4200"",
+  ""http://localhost:4200"",
   ""https://localhost:9002"",
   ""https://.*\\.model-t\\.cc\\.commerce\\.ondemand\\.com""
 ]"

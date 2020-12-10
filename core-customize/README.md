@@ -1,35 +1,42 @@
 # SAP Commerce Project Template for CCv2
 
-1. Download this repository
-1. Download the latest SAP Commerce 2011 release zip file and put it into the `platform` folder using the correct file name, e.g.
-   
-   ```bash
-   cp ~/Downloads/CXCOMM201100P*.ZIP ./platform/hybris-commerce-suite-2011.0.zip
-   ```
+> **Initial project bootstrap**
+>
+> 1. Download the latest SAP Commerce 2011 release zip file and put it into the `platform` folder
+>    using the correct file name, e.g.
+>
+>    ```bash
+>    cp ~/Downloads/CXCOMM201100P*.ZIP ./platform/hybris-commerce-suite-2011.0.zip
+>    ```
+>
+> 1. Bootstrap the starting point for your Commerce project by running the following command:
+>
+>    ```bash
+>    ./gradlew -b bootstrap.gradle.kts \
+>      -PprojectName=<name, e.g. coolshop> \
+>      -ProotPackage=<package, e.g. com.cool.shop>
+>    ```
+>
+>    (N.B.: If you use a headless setup: You can delete the generated `<something>storefront` extension
+>     afterwards. Don't forget to remove it from `localextensions.xml` / `manifest.json`)
+> 1. Review the generated configuration in `hybris/config`, especially the `hybris/config/environment/*.properties`
+>    files and `localextensions.xml` (search for `TODO:` comments)
+> 1. Update the `manifest.jsonnet` (again, search for `TODO:` comments).\
+>    You can use the jsonnet file to update the `manifest.json` for your project.
+> 1. Delete all bootstrap files, you don't need them anymore:
+>
+>    ```bash
+>    rm -r bootstrap*
+>    ```
+>
+> 1. Delete this quote
+> 1. Commit and push the changes to your project repository :)
 
-1. Bootstrap the starting point for your Commerce project by running the following command:
-   
-   ```bash
-   ./gradlew -b bootstrap.gradle.kts \
-     -PprojectName=<name, e.g. coolshop> \
-     -ProotPackage=<package, e.g. com.cool.shop>
-   ```
+We use Gradle + [commerce-gradle-plugin][plugin] to automate whole project setup.
 
-   (N.B.: If you use a headless setup: You can delete the generated `<something>storefront` extension afterwards. Don't forget to remove it from `localextensions.xml` / `manifest.json`)
-1. Review the generated configuration in `hybris/config`, especially the `hybris/config/environment/*.properties` files and `localextensions.xml` (search for `TODO:` comments)
-1. Update the `manifest.jsonnet` (again, search for `TODO:` comments).\
-   You can use the jsonnet file to update the `manifest.json` for your project.
-1. Delete all bootstrap files, you don't need them anymore:
+[plugin]: https://github.com/SAP/commerce-gradle-plugin
 
-   ```bash
-   rm -r bootstrap*
-   ```
-
-1. Commit and push the changes to your project repository :) 
-
-After the initial setup is done, you can use all the cool features of the `commerce-gradle-plugin`.
-
-## Setup local development environment after a fresh clone
+## Setup local development
 
 ```sh
 git clone <project>
@@ -41,7 +48,9 @@ cd core-customize
 ./gradlew yinitialize
 ```
 
-## How to use manifest.jsonnet
+## FAQ
+
+###  How to use manifest.jsonnet?
 
 To generate the `manifest.json` with [Jsonnet](https://jsonnet.org/):
 
@@ -49,13 +58,21 @@ To generate the `manifest.json` with [Jsonnet](https://jsonnet.org/):
 jsonnet --output-file manifest.json manifest.jsonnet
 ```
 
-## How does it work?
+### How do I add an addon to my storefront?
 
-We use Gradle + [commerce-gradle-plugin][plugin] to automate whole project setup.
+1. Add the addon to the `manifest.json` (either by hand or via `manifest.jsonnet`, [documentation][addon])
+1. Run `./gradlew installManifestAddon`
+1. Reformat `<storefront>/extensioninfo.xml` (unfortunately, the the platform build messes it up when adding addons)
+1. Commit/push your changes
+1. Tell your team to run `./gradlew installManifestAddon` after pulling your changes, it this is not standard.
 
-[plugin]: https://github.com/SAP/commerce-gradle-plugin
+[addon]: https://help.sap.com/viewer/1be46286b36a4aa48205be5a96240672/LATEST/en-US/9a3ab7d08c704fccb7fd899e876d41d6.html
 
-By combining the [configuration reuse][reuse] mechanism of CCv2, the [optional configuration folder][folder] of Commerce and a bit of clever symlinking of files and folders, we can use the same configuration locally and in the cloud.
+## Why does the configuration work for local development and the cloud?
+
+By combining the [configuration reuse][reuse] mechanism of CCv2, the [optional configuration folder][folder]
+of Commerce and a bit of clever symlinking of files and folders, we can use the same configuration
+locally and in the cloud.
 
 This setup uses:
 
@@ -64,7 +81,7 @@ This setup uses:
    There is one file per aspect, plus the special file `local-dev.properties` that configures the local development environment
 - `hybris/config/local-config` is configured as `hybris.optional.config.dir` and contains *symlinks* 
   to the relevant property files in `hybris/config/environments` (by default: `common.properties` and `local-dev.properties`).\
-  **Important** Contrary to more default setups, `local.properties` must not be modified at all (that's why it is in `.gitignore`).
+  **Important** `local.properties` must not be modified at all (that's why it is in `.gitignore`).
   - If you have any configuration specific to your local machine, put it in `hybris/config/local-config/99-local.properties`.
   - If the local setup changes for the whole project, update `hybris/config/environments/local-dev.properties`
 - The default cloud solr configuration set is contained in the correct folder structure for CCv2 ([documentation][solr]).
@@ -120,20 +137,14 @@ manifest.json           |         │  │  │  ├── 10-local.properties +
 [folder]: https://help.sap.com/viewer/b490bb4e85bc42a7aa09d513d0bcb18e/LATEST/en-US/8beb75da86691014a0229cf991cb67e4.html
 [solr]: https://help.sap.com/viewer/b2f400d4c0414461a4bb7e115dccd779/LATEST/en-US/f7251d5a1d6848489b1ce7ba46300fe6.html
 
-## FAQ
-
-### How do I add an addon to my storefront?
-
-1. Add the addon to the `manifest.json`, either by hand or via `manifest-generator.jsonnet` ([documentation][addon])
-1. Run `./gradlew installManifestAddon`
-1. Reformat `<storefront>/extensioninfo.xml` (unfortunately, the the platform build messes it up when adding addons)
-1. Commit/push your changes
-
-[addon]: https://help.sap.com/viewer/1be46286b36a4aa48205be5a96240672/LATEST/en-US/9a3ab7d08c704fccb7fd899e876d41d6.html
-
 ## Demo Setup
 
-1. Generate the sample `manifest.json` as described above
-1. Download the latest Commerce platform 2011 zip file and save it as `platform/hybris-commerce-suite-2011.0.zip`
-1. Generate `demoshop` storefront and `hybris/config` folder: `./gradlew generateProprietaryCode`
-1. Setup local development `./gradlew setupLocalDevelopment`
+The file `bootstrap-demo.gradle.kts` bootstraps a demo storefront based on the `cx` [recipe][recipe],
+including the `spartacussampledataaddon` (necessary to demo the Spartacus storefront; [documentation][spartacussample])
+
+To generate the demo, run:
+```
+./gradlew bootstrap-demo.gradle.kts
+```
+[spartacussample]: https://sap.github.io/spartacus-docs/spartacussampledataaddon/
+[recipe]: https://help.sap.com/viewer/a74589c3a81a4a95bf51d87258c0ab15/2011/en-US/f09d46cf4a2546b586ed7021655e4715.html
