@@ -1,0 +1,5 @@
+envribbonaddon.application-context=envribbonaddon-spring.xml
+
+yacceleratorstorefront.additionalWebSpringConfigs.envribbonaddon=classpath:/envribbonaddon/web/spring/envribbonaddon-web-spring.xml
+
+envribbonaddon.css.paths.responsive=/responsive/common/css/envribbonaddon.css

@@ -1,0 +1,8 @@
+$contentCatalog=apparel-ukContentCatalog
+$contentCV=catalogVersion(CatalogVersion.catalog(Catalog.id[default=$contentCatalog]),CatalogVersion.version[default=Staged])[default=$contentCatalog:Staged]
+
+INSERT_UPDATE EnvRibbonComponent;$contentCV[unique=true];uid[unique=true];
+                               ;;environmentRibbon
+
+INSERT_UPDATE ElementsForSlot;source(uid,$contentCV)[unique=true];target(uid,$contentCV)[unique=true];
+                             ;FooterSlot;environmentRibbon;

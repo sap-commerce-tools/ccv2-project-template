@@ -1,0 +1,27 @@
+<?xml version="1.0"?>
+<project name="envribbon_buildcallbacks" >
+
+    <property name="ribbonStyle" value="${ext.envribbon.path}/resources/envribbon/envribbon.css" />
+    <macrodef name="envribbon_before_build">
+        <sequential>
+            <copy file="${ribbonStyle}" tofile="${ext.envribbon.path}/hac/resources/static/css/envribbon.css" overwrite="true"/>
+            <copy file="${ribbonStyle}" tofile="${ext.envribbon.path}/resources/cockpitng/cng/css/envribbon_common.css" overwrite="true"/>
+        </sequential>
+    </macrodef>
+
+    <property name="hacMainDecorator" value="${ext.hac.path}/web/webroot/WEB-INF/jsp/decorators/main.jsp" />
+    <macrodef name="envribbon_after_build">
+        <sequential>
+            <echo message="Patching ${hacMainDecorator}"/>
+            <replaceregexp file="${hacMainDecorator}" flags="m">
+                <regexp pattern='^&lt;/head&gt;$'/>
+                <substitution
+                        expression='${line.separator}
+&lt;!-- START ENV RIBBON --&gt;${line.separator}
+&lt;link rel="stylesheet" type="text/css" media="screen, projection" href="&lt;c:url value="/static/css/envribbon.css"/&gt;" /&gt;${line.separator}
+&lt;script type="text/javascript" src="&lt;c:url value="/static/js/envribbon.js"/&gt;" defer &gt;&lt;/script&gt;${line.separator}
+&lt;!-- END ENV RIBBON --&gt;&lt;/head&gt;'/>
+            </replaceregexp>
+        </sequential>
+    </macrodef>
+</project>
