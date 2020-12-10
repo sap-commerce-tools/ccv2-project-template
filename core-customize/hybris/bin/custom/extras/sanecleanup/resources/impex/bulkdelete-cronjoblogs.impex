@@ -1,0 +1,58 @@
+INSERT_UPDATE Script; code[unique=true];active[unique=true];content 
+;removeCronjobLogs;true;"
+import de.hybris.platform.servicelayer.impex.ImportConfig
+import de.hybris.platform.servicelayer.impex.impl.StreamBasedImpExResource
+import de.hybris.platform.servicelayer.cronjob.PerformResult
+import de.hybris.platform.cronjob.enums.CronJobStatus
+import de.hybris.platform.cronjob.enums.CronJobResult
+
+// all log files EXCEPT the five most recent logs per cronjob
+def QUERY = '''
+SELECT t.pk
+FROM
+  (SELECT m.pk,
+          m.OwnerPKString,
+          row_number() OVER (PARTITION BY m.OwnerPKString
+                             ORDER BY m.createdTS DESC) AS rn
+   FROM medias m
+   JOIN composedtypes t ON m.typepkstring = t.pk
+     AND t.internalcode = 'LogFile' ) t
+WHERE t.rn > 5 OR t.OwnerPKString IS NULL
+'''
+
+def IMPEX_HEADER = 'REMOVE LogFile;pk[unique=true]\n'
+
+def logPKs = jdbcTemplate.queryForList(QUERY)
+
+if (logPKs) {
+  def impexScript = IMPEX_HEADER
+  log.info ""Number of logs to delete: ${logPKs.size}""
+  logPKs.each {
+    impexScript += "";${it.pk}\n""
+  }
+  
+  def impexResource = new StreamBasedImpExResource(new ByteArrayInputStream(impexScript.getBytes('UTF-8')), 'UTF-8')
+
+  def importConfig = new ImportConfig()
+  importConfig.synchronous = true
+  importConfig.sldForData = true
+  importConfig.removeOnSuccess = true
+  importConfig.script = impexResource
+  
+  def importResult = importService.importData(importConfig)  
+  log.info ""Deleted cronjob log files. ${importResult.successful ? 'SUCCESS' : 'FAILED'}""
+  if (!importResult.successful) {
+    return new PerformResult(CronJobResult.ERROR, CronJobStatus.FINISHED)
+  }
+} else {
+  log.info 'Nothing to delete'
+}
+return new PerformResult(CronJobResult.SUCCESS, CronJobStatus.FINISHED)
+"
+
+
+INSERT_UPDATE ScriptingJob; code[unique=true];scriptURI
+;logFileBulkCleanupJob;model://removeCronjobLogs
+
+INSERT_UPDATE CronJob; code[unique=true];job(code);sessionLanguage(isocode)
+;logFileBulkCleanupCronjob;logFileBulkCleanupJob;en
