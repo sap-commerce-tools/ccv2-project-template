@@ -5,6 +5,7 @@
 
     <extension name="envribbon"/>
     <extension name="hacvcsinfo"/>
+    <extension name="sanecleanup"/>
     
     <extension name="@projectName@backoffice"/>
     <extension name="@projectName@initialdata"/>
