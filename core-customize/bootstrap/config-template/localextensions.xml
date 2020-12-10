@@ -4,6 +4,7 @@
     <path dir="${HYBRIS_BIN_DIR}"/>
 
     <extension name="envribbon"/>
+    <extension name="hacvcsinfo"/>
     
     <extension name="@projectName@backoffice"/>
     <extension name="@projectName@initialdata"/>
