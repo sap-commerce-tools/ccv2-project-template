@@ -1,0 +1,13 @@
+[
+  {
+    "basePath": "/hacvcsinfo",
+    "mainTabLabel": "Version Information",
+    "subTabs": [
+      {
+        "path": "/vcs/",
+        "label": "GIT",
+        "skipPrefix": false
+      }
+    ]
+  }
+]
