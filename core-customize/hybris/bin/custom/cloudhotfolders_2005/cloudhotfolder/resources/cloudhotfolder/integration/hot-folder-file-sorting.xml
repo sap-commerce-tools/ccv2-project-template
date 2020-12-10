@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+ [y] hybris Platform
+
+ Copyright (c) 2017 SAP SE or an SAP affiliate company.  All rights reserved.
+
+ This software is the confidential and proprietary information of SAP
+ ("Confidential Information"). You shall not disclose such Confidential
+ Information and shall use it only in accordance with the terms of the
+ license agreement you entered into with SAP.
+-->
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd">
+
+
+    <bean id="cloudHotFolderNamePrefixComparator"
+          class="de.hybris.platform.cloud.commons.spring.integration.file.comparators.NamePrefixComparator">
+        <constructor-arg name="namePrefixPriority" value="${cloud.hotfolder.storage.file.sort.name.prefix.priority}"/>
+    </bean>
+
+    <bean id="cloudHotFolderNameComparator"
+          class="de.hybris.platform.cloud.commons.spring.integration.file.comparators.NameComparator">
+        <constructor-arg name="pattern" value="${cloud.hotfolder.storage.file.sort.name.sequence}"/>
+        <constructor-arg name="nameGroup" value="filename"/>
+    </bean>
+
+    <bean id="cloudHotFolderNameSequenceComparator"
+          class="de.hybris.platform.cloud.commons.spring.integration.file.comparators.NameSequenceComparator">
+        <constructor-arg name="pattern" value="${cloud.hotfolder.storage.file.sort.name.sequence}"/>
+        <constructor-arg name="sequenceGroup" value="sequence"/>
+    </bean>
+
+    <bean id="cloudHotFolderModifiedComparator"
+          class="de.hybris.platform.cloud.commons.spring.integration.file.comparators.TimestampComparator"/>
+
+</beans>

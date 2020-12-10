@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+ [y] hybris Platform
+
+ Copyright (c) 2017 SAP SE or an SAP affiliate company.  All rights reserved.
+
+ This software is the confidential and proprietary information of SAP
+ ("Confidential Information"). You shall not disclose such Confidential
+ Information and shall use it only in accordance with the terms of the
+ license agreement you entered into with SAP.
+-->
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans
+           http://www.springframework.org/schema/beans/spring-beans.xsd">
+
+	<alias name="cloudSuspendResumeService" alias="suspendResumeService"/>
+	<bean id="cloudSuspendResumeService" parent="defaultSuspendResumeService"
+	      class="de.hybris.platform.cloud.commons.suspend.CloudSuspendResumeService"/>
+
+	<!-- Lock Registry/Repository Implementations -->
+
+	<bean id="cloudCommonsLockRepository"
+	      class="de.hybris.platform.cloud.commons.spring.integration.support.locks.database.HybrisLockRepository">
+		<property name="region" value="${cloudcommons.locking.dblock.region}"/>
+		<property name="ttl" value="${cloudcommons.locking.dblock.ttl}"/>
+		<property name="modelService" ref="modelService"/>
+		<property name="applicationResourceLockDao" ref="applicationResourceLockDao"/>
+		<property name="role" value="integration"/>
+		<property name="autoStartup" value="false"/>
+		<property name="phase" value="20"/>
+	</bean>
+
+	<bean id="cloudCommonsLockRegistry"
+	      class="org.springframework.integration.jdbc.lock.JdbcLockRegistry">
+		<constructor-arg name="client" ref="cloudCommonsLockRepository"/>
+	</bean>
+
+	<alias name="defaultApplicationResourceLockDao" alias="applicationResourceLockDao"/>
+	<bean id="defaultApplicationResourceLockDao"
+	      class="de.hybris.platform.cloud.commons.spring.integration.support.locks.database.dao.impl.DefaultApplicationResourceLockDao">
+		<property name="flexibleSearchService" ref="flexibleSearchService"/>
+	</bean>
+
+
+	<!-- Start/Stop/Suspend/Resume the beans in the SmartLifecycleRoleController along with the hybris lifecycle -->
+	<bean id="hybrisGroupRoleController"
+	      class="de.hybris.platform.cloud.commons.core.impl.HybrisGroupRoleController">
+		<constructor-arg name="controller"
+		                 ref="#{T(org.springframework.integration.context.IntegrationContextUtils).INTEGRATION_LIFECYCLE_ROLE_CONTROLLER}"/>
+	</bean>
+
+	<!-- Scan for implementations of SmartLifecycleRole and add into SmartLifecycleRoleController -->
+	<bean id="smartLifecycleBeanPostProcessor"
+	      class="de.hybris.platform.cloud.commons.spring.beans.factory.config.impl.SmartLifecycleRoleBeanPostProcessor"/>
+
+	<!-- MetadataStore to ensure items are only imported once e.g. remote file synchronization -->
+	<alias name="defaultMetadataStoreEntryDao" alias="metadataStoreEntryDao"/>
+	<bean id="defaultMetadataStoreEntryDao"
+	      class="de.hybris.platform.cloud.commons.spring.integration.metadata.dao.impl.MetadataStoreEntryDao"/>
+
+	<bean id="abstractHybrisMetadataStore"
+	      class="de.hybris.platform.cloud.commons.spring.integration.metadata.HybrisMetadataStore" abstract="true">
+		<constructor-arg name="modelService" ref="modelService"/>
+		<constructor-arg name="metadataStoreDao" ref="metadataStoreEntryDao"/>
+		<constructor-arg name="lockRegistry" ref="cloudCommonsLockRegistry"/>
+		<constructor-arg name="lockTtl" value="${cloudcommons.locking.dblock.ttl}"/>
+	</bean>
+
+	<bean id="tenantAwareConfigPropertyImportProcessor"
+		  class="de.hybris.platform.cloud.commons.services.impex.impl.TenantAwareConfigPropertyImportProcessor"/>
+
+	<import resource="cloudcommons/cloudcommons-monitoring.xml"/>
+
+</beans>

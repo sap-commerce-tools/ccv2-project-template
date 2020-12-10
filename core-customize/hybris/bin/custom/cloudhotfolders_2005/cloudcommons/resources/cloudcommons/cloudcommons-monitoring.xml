@@ -1,0 +1,165 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+ [y] hybris Platform
+
+ Copyright (c) 2017 SAP SE or an SAP affiliate company.  All rights reserved.
+
+ This software is the confidential and proprietary information of SAP
+ ("Confidential Information"). You shall not disclose such Confidential
+ Information and shall use it only in accordance with the terms of the
+ license agreement you entered into with SAP.
+-->
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:util="http://www.springframework.org/schema/util"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans
+           http://www.springframework.org/schema/beans/spring-beans.xsd http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util.xsd">
+
+    <bean id="abstractConfigEnabledMonitorRecorder" class="de.hybris.platform.cloud.commons.services.monitor.impl.AbstractConfigEnabledMonitorRecorder" abstract="true">
+        <property name="configurationService" ref="configurationService"/>
+    </bean>
+
+    <bean id="loggingMonitorDateTimeFormat" class="org.joda.time.format.ISODateTimeFormat" factory-method="dateTime" />
+
+    <bean id="abstractMonitorConverter" abstract="true"
+          class="de.hybris.platform.cloud.commons.services.monitor.logging.converter.AbstractMonitorConverter">
+        <property name="dateTimeFormatter" ref="loggingMonitorDateTimeFormat"/>
+    </bean>
+
+    <bean id="loggingMonitorHistoryEntryActionDataConverter" parent="abstractMonitorConverter"
+          class="de.hybris.platform.cloud.commons.services.monitor.logging.converter.MonitorHistoryEntryActionDataConverter" />
+
+    <bean id="loggingMonitorHistoryEntryDataConverter" parent="abstractMonitorConverter"
+          class="de.hybris.platform.cloud.commons.services.monitor.logging.converter.MonitorHistoryEntryDataConverter">
+        <property name="entryActionDataConverter" ref="loggingMonitorHistoryEntryActionDataConverter"/>
+    </bean>
+
+    <bean id="loggingMonitorHistoryDataConverter" parent="abstractMonitorConverter"
+          class="de.hybris.platform.cloud.commons.services.monitor.logging.converter.MonitorHistoryDataConverter">
+        <property name="entryConverter" ref="loggingMonitorHistoryEntryDataConverter"/>
+    </bean>
+
+    <bean id="loggingMonitorRecorder" class="de.hybris.platform.cloud.commons.services.monitor.logging.LoggingMonitorRecorder"
+          parent="abstractConfigEnabledMonitorRecorder">
+        <property name="historyConverter" ref="loggingMonitorHistoryDataConverter"/>
+        <property name="infoStatuses">
+            <list>
+                <value>IN_PROGRESS</value>
+                <value>SUCCESS</value>
+            </list>
+        </property>
+        <property name="warnStatuses">
+            <list>
+                <value>WARNING</value>
+            </list>
+        </property>
+        <property name="errorStatuses">
+            <list>
+                <value>FAILURE</value>
+            </list>
+        </property>
+    </bean>
+
+    <bean id="monitorHistoryFactory" class="de.hybris.platform.cloud.commons.services.monitor.MonitorHistoryFactory"/>
+
+    <alias name="defaultMonitorHistoryDataDao" alias="monitorHistoryDataDao"/>
+    <bean id="defaultMonitorHistoryDataDao" class="de.hybris.platform.cloud.commons.services.monitor.database.dao.impl.DefaultMonitorHistoryDataDao"/>
+
+    <bean id="dbMonitorHistoryEntryActionDataConverter" class="de.hybris.platform.cloud.commons.services.monitor.database.converter.MonitorHistoryEntryActionDataConverter">
+        <property name="modelService" ref="modelService"/>
+    </bean>
+
+    <bean id="dbMonitorHistoryEntryDataConverter" class="de.hybris.platform.cloud.commons.services.monitor.database.converter.MonitorHistoryEntryDataConverter">
+        <property name="modelService" ref="modelService"/>
+        <property name="actionConverter" ref="dbMonitorHistoryEntryActionDataConverter"/>
+    </bean>
+
+    <bean id="dbMonitorHistoryDataConverter" class="de.hybris.platform.cloud.commons.services.monitor.database.converter.MonitorHistoryDataConverter">
+        <property name="modelService" ref="modelService"/>
+        <property name="entryConverter" ref="dbMonitorHistoryEntryDataConverter"/>
+    </bean>
+
+    <bean id="dbMonitorHistoryReverseEntryActionDataConverter" class="de.hybris.platform.cloud.commons.services.monitor.database.converter.MonitorHistoryReverseEntryActionDataConverter"/>
+
+    <bean id="dbMonitorHistoryReverseEntryConverter" class="de.hybris.platform.cloud.commons.services.monitor.database.converter.MonitorHistoryReverseEntryConverter">
+        <property name="actionReverseConverter" ref="dbMonitorHistoryReverseEntryActionDataConverter"/>
+    </bean>
+
+    <bean id="dbMonitorHistoryReverseConverter" class="de.hybris.platform.cloud.commons.services.monitor.database.converter.MonitorHistoryReverseConverter">
+        <property name="historyFactory" ref="monitorHistoryFactory"/>
+        <property name="entryReverseConverter" ref="dbMonitorHistoryReverseEntryConverter"/>
+    </bean>
+
+    <alias name="defaultDatabaseMonitorRecorder" alias="databaseMonitorRecorder"/>
+    <bean id="defaultDatabaseMonitorRecorder" class="de.hybris.platform.cloud.commons.services.monitor.database.DatabaseMonitorRecorder" parent="abstractConfigEnabledMonitorRecorder">
+        <property name="modelService" ref="modelService"/>
+        <property name="historyConverter" ref="dbMonitorHistoryDataConverter"/>
+    </bean>
+
+    <alias name="databaseMonitorHistoryRestorer" alias="monitorHistoryRestorer"/>
+    <bean id="databaseMonitorHistoryRestorer" class="de.hybris.platform.cloud.commons.services.monitor.database.DatabaseMonitorHistoryRestorer">
+        <property name="historyFactory" ref="monitorHistoryFactory"/>
+        <property name="monitoryHistoryDao" ref="monitorHistoryDataDao"/>
+        <property name="historyReverseConverter" ref="dbMonitorHistoryReverseConverter"/>
+    </bean>
+
+    <bean id="unsavedEntryMonitorEntryFilter" class="de.hybris.platform.cloud.commons.services.monitor.impl.UnsavedEntryMonitorEntryFilter"/>
+
+    <bean id="abstractMetricRecorder" class="de.hybris.platform.cloud.commons.services.monitor.metric.AbstractMetricRecorder"
+          parent="abstractConfigEnabledMonitorRecorder" abstract="true">
+        <property name="metricRegistry" ref="metricRegistry"/>
+        <property name="entryFilter" ref="unsavedEntryMonitorEntryFilter"/>
+    </bean>
+
+    <bean id="counterMetricRecorder" class="de.hybris.platform.cloud.commons.services.monitor.metric.CounterMetricRecorder" parent="abstractMetricRecorder"/>
+    <bean id="timerMetricRecorder" class="de.hybris.platform.cloud.commons.services.monitor.metric.TimerMetricRecorder" parent="abstractMetricRecorder"/>
+    <bean id="histogramMetricRecorder" class="de.hybris.platform.cloud.commons.services.monitor.metric.HistogramMetricRecorder" parent="abstractMetricRecorder"/>
+
+    <bean id="compoundMonitorRecorder" class="de.hybris.platform.cloud.commons.services.monitor.impl.CompoundMonitorRecorder">
+        <property name="recorders">
+            <list>
+                <ref bean="loggingMonitorRecorder"/>
+                <ref bean="databaseMonitorRecorder"/>
+                <ref bean="counterMetricRecorder"/>
+                <ref bean="timerMetricRecorder"/>
+                <ref bean="histogramMetricRecorder"/>
+            </list>
+        </property>
+    </bean>
+
+    <alias name="defaultMonitorService" alias="monitorService"/>
+    <bean id="defaultMonitorService" class="de.hybris.platform.cloud.commons.services.monitor.impl.DefaultMonitorService">
+        <property name="monitorRecorder" ref="compoundMonitorRecorder"/>
+        <property name="historyFactory" ref="monitorHistoryFactory"/>
+        <property name="resumeMonitorRestorer" ref="monitorHistoryRestorer"/>
+    </bean>
+
+    <bean id="abstractMonitorHistoryMaintenanceCleanupStrategy" abstract="true"
+          class="de.hybris.platform.cloud.commons.services.monitor.job.MonitorHistoryMaintenanceCleanupStrategy">
+        <property name="configurationService" ref="configurationService"/>
+        <property name="modelService" ref="modelService"/>
+        <property name="timeService" ref="timeService"/>
+    </bean>
+
+    <bean id="cleanUpMonitorHistorySuccessfulJob" parent="abstractGenericMaintenanceJobPerformable">
+        <property name="maintenanceCleanupStrategy">
+            <bean class="de.hybris.platform.cloud.commons.services.monitor.job.MonitorHistoryMaintenanceCleanupStrategy"
+                  parent="abstractMonitorHistoryMaintenanceCleanupStrategy">
+                <property name="status" value="SUCCESS"/>
+                <property name="statusCondition" value="="/>
+                <property name="thresholdConfigKey" value="cloud.commons.monitoring.job.cleanup.successful.threshold"/>
+            </bean>
+        </property>
+    </bean>
+
+    <bean id="cleanUpMonitorHistoryUnsuccessfulJob" parent="abstractGenericMaintenanceJobPerformable">
+        <property name="maintenanceCleanupStrategy">
+            <bean class="de.hybris.platform.cloud.commons.services.monitor.job.MonitorHistoryMaintenanceCleanupStrategy"
+                  parent="abstractMonitorHistoryMaintenanceCleanupStrategy">
+                <property name="status" value="SUCCESS"/>
+                <property name="statusCondition" value="!="/>
+                <property name="thresholdConfigKey" value="cloud.commons.monitoring.job.cleanup.unsuccessful.threshold"/>
+            </bean>
+        </property>
+    </bean>
+
+</beans>

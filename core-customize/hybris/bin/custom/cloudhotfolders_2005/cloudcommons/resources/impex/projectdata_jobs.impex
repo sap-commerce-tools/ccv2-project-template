@@ -1,0 +1,24 @@
+# -----------------------------------------------------------------------
+# [y] hybris Platform
+#
+# Copyright (c) 2018 SAP SE or an SAP affiliate company.  All rights reserved.
+#
+# This software is the confidential and proprietary information of SAP
+# ("Confidential Information"). You shall not disclose such Confidential
+# Information and shall use it only in accordance with the terms of the
+# license agreement you entered into with SAP.
+# -----------------------------------------------------------------------
+INSERT_UPDATE MaintenanceCleanupJob; code[unique = true]                      ; springId                             ; sessionLanguage(isocode)
+                                   ; cleanUpMonitorHistorySuccessfulJob   ; cleanUpMonitorHistorySuccessfulJob   ; en
+                                   ; cleanUpMonitorHistoryUnsuccessfulJob ; cleanUpMonitorHistoryUnsuccessfulJob ; en
+
+# Create a cron job for cleaning up deleted files
+INSERT_UPDATE CronJob; code[unique = true]                      ; job(code)                            ; sessionLanguage(isocode)
+                     ; cleanUpMonitorHistorySuccessfulCronJob   ; cleanUpMonitorHistorySuccessfulJob   ; en
+                     ; cleanUpMonitorHistoryUnsuccessfulCronJob ; cleanUpMonitorHistoryUnsuccessfulJob ; en
+
+
+# Trigger the given cronjobs every hour
+INSERT_UPDATE Trigger; cronJob(code)[unique = true]             ; cronExpression
+                     ; cleanUpMonitorHistorySuccessfulCronJob   ; 0 0 * * * ?
+                     ; cleanUpMonitorHistoryUnsuccessfulCronJob ; 0 0 * * * ?

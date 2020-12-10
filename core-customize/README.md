@@ -1,23 +1,53 @@
 # SAP Commerce Project Template for CCv2
 
+1. Download this repository
+1. Download the latest SAP Commerce 2011 release zip file and put it into the `platform` folder using the correct file name, e.g.
+   
+   ```bash
+   cp ~/Downloads/CXCOMM201100P*.ZIP ./platform/hybris-commerce-suite-2011.0.zip
+   ```
+
+1. Bootstrap the starting point for your Commerce project by running the following command:
+   
+   ```bash
+   ./gradlew -b bootstrap.gradle.kts \
+     -PprojectName=<name, e.g. coolshop> \
+     -ProotPackage=<package, e.g. com.cool.shop>
+   ```
+
+   (N.B.: If you use a headless setup: You can delete the generated `<something>storefront` extension afterwards. Don't forget to remove it from `localextensions.xml` / `manifest.json`)
+1. Review the generated configuration in `hybris/config`, especially the `hybris/config/environment/*.properties` files and `localextensions.xml` (search for `TODO:` comments)
+1. Update the `manifest.jsonnet` (again, search for `TODO:` comments).\
+   You can use the jsonnet file to update the `manifest.json` for your project.
+1. Delete all bootstrap files, you don't need them anymore:
+
+   ```bash
+   rm -r bootstrap*
+   ```
+
+1. Commit and push the changes to your project repository :) 
+
+After the initial setup is done, you can use all the cool features of the `commerce-gradle-plugin`.
+
+## Setup local development environment after a fresh clone
+
+```sh
+git clone <project>
+cd <project>
+docker-compose up
+cd core-customize
+./gradlew setupLocalDevelopment
+./gradlew yclean yall
+./gradlew yinitialize
+```
+
+## How to use manifest.jsonnet
+
 To generate the `manifest.json` with [Jsonnet](https://jsonnet.org/):
 
 ```bash
-jsonnet --output-file manifest.json manifest-generator.jsonnet
+jsonnet --output-file manifest.json manifest.jsonnet
 ```
-
-**Alternatively**, if you don't want to install Jsonnet, run
-
-```bash
-./gradlew -b generate-manifest.gradle.kts
-```
-
-## Demo Setup
-
-1. Generate the sample `manifest.json` as described above
-1. Download the latest Commerce platform 2011 zip file and save it as `platform/hybris-commerce-suite-2011.0.zip`
-1. Generate `demoshop` storefront and `hybris/config` folder: `./gradlew generateProprietaryCode`
-1. Setup local development `./gradlew setupLocalDevelopment`
 
 ## How does it work?
 
@@ -86,7 +116,24 @@ manifest.json           |         │  │  │  ├── 10-local.properties +
 
 ```
 
-
 [reuse]: https://help.sap.com/viewer/1be46286b36a4aa48205be5a96240672/LATEST/en-US/2311d89eef9344fc81ef168ac9668307.html
 [folder]: https://help.sap.com/viewer/b490bb4e85bc42a7aa09d513d0bcb18e/LATEST/en-US/8beb75da86691014a0229cf991cb67e4.html
 [solr]: https://help.sap.com/viewer/b2f400d4c0414461a4bb7e115dccd779/LATEST/en-US/f7251d5a1d6848489b1ce7ba46300fe6.html
+
+## FAQ
+
+### How do I add an addon to my storefront?
+
+1. Add the addon to the `manifest.json`, either by hand or via `manifest-generator.jsonnet` ([documentation][addon])
+1. Run `./gradlew installManifestAddon`
+1. Reformat `<storefront>/extensioninfo.xml` (unfortunately, the the platform build messes it up when adding addons)
+1. Commit/push your changes
+
+[addon]: https://help.sap.com/viewer/1be46286b36a4aa48205be5a96240672/LATEST/en-US/9a3ab7d08c704fccb7fd899e876d41d6.html
+
+## Demo Setup
+
+1. Generate the sample `manifest.json` as described above
+1. Download the latest Commerce platform 2011 zip file and save it as `platform/hybris-commerce-suite-2011.0.zip`
+1. Generate `demoshop` storefront and `hybris/config` folder: `./gradlew generateProprietaryCode`
+1. Setup local development `./gradlew setupLocalDevelopment`
