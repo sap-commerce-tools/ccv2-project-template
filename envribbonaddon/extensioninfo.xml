@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<extensioninfo xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="extensioninfo.xsd">
+    <extension abstractclassprefix="Generated" classprefix="Envribbonaddon" description="envribbonaddon extension" managername="EnvribbonaddonManager" managersuperclass="de.hybris.platform.jalo.extension.Extension" name="envribbonaddon">
+
+        <requires-extension name="addonsupport"/>
+        <requires-extension name="envribbon"/>
+
+        <coremodule generated="true" manager="de.hybris.platform.jalo.extension.GenericManager" packageroot="mpern.sap.commerce.ribbon"/>
+
+        <meta key="classpathgen" value="false"/>
+    </extension>
+</extensioninfo>
