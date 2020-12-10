@@ -1,0 +1,10 @@
+#Ant properties
+#Thu Jul 19 08:00:01 GMT 2018
+builddate=20180719 0759
+description=hacvcsinfo
+group.id=de.hybris.platform
+module.name=platform-module
+name=hacvcsinfo
+vendor=hybris
+version=18.08
+version.api=18.08.0
