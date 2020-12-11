@@ -16,6 +16,6 @@ jsonnet --output-file manifest.json manifest-generator.jsonnet
 
 1. Generate the sample `manifest.json` as described above
 1. Download the latest Commerce platform 1905 zip file and save it as `platform/hybris-commerce-suite-1905.6.zip`
-1. Download the latest loud extension pack 1905 zip file and save it as `platform/hybris-cloud-extension-pack-1905.5.zip`
+1. Download the latest cloud extension pack 1905 zip file and save it as `platform/hybris-cloud-extension-pack-1905.5.zip`
 1. Generate `demoshop` storefront and `hybris/config` folder: `./gradlew generateProprietaryCode`
 1. Setup local development `./gradlew setupLocalDevelopment`
