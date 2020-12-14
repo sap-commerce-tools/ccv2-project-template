@@ -11,6 +11,7 @@ const occConfig: OccConfig = { backend: { occ: {} } };
 // only provide the `occ.baseUrl` key if it is explicitly configured, otherwise the value of
 // <meta name="occ-backend-base-url" > is ignored.
 // This in turn breaks the deployment in CCv2
+// https://github.com/SAP/spartacus/issues/5886
 occConfig.backend.occ.prefix = '/occ/v2/'
 if (environment.occBaseUrl) {
   occConfig.backend.occ.baseUrl = environment.occBaseUrl;
