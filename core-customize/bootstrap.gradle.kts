@@ -40,6 +40,13 @@ tasks.register<HybrisAntTask>("generateNewStorefront") {
     antProperty("input.package", inputPackage)
 }
 
+tasks.register<Copy>("copyConfigImpex") {
+    mustRunAfter("generateNewStorefront")
+    from("bootstrap/")
+    include("*.impex")
+    into("hybris/bin/custom/${inputName}/${inputName}storefront/resources/impex/")
+}
+
 // ant extgen -Dinput.template=yocc -Dinput.name=demoshopocc -Dinput.package=com.demo.shop.occ
 tasks.register<HybrisAntTask>("generateOcc") {
     dependsOn("bootstrapPlatform", "createDefaultConfig")
@@ -61,7 +68,7 @@ tasks.register<HybrisAntTask>("generateOccTests") {
 }
 
 tasks.register("generateCode") {
-    dependsOn("generateNewStorefront", "generateOcc", "generateOccTests")
+    dependsOn("generateNewStorefront", "copyConfigImpex", "generateOcc", "generateOccTests")
     doLast {
          ant.withGroovyBuilder {
             "move"("file" to "hybris/bin/custom/${inputName}occ", "todir" to "hybris/bin/custom/${inputName}")
@@ -177,7 +184,7 @@ tasks.register("bootstrapNewProject") {
     doLast {
         println("==== Project generation finished! ====")
         println("- Generated extensions:")
-        file("hybris/bin/custom/${inputName}").listFiles().forEach {
+        file("hybris/bin/custom/${inputName}").listFiles().sortedBy{ it.name }.forEach {
             println("\t${it.name}")
         }
         println("- Generated new manifest.json (using manifest.jsonnet)")
