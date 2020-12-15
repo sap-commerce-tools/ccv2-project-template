@@ -182,7 +182,7 @@ tasks.register("bootstrapNewProject") {
         }
         println("- Generated new manifest.json (using manifest.jsonnet)")
         println("")
-        println("To finish the setup, please execute:")
+        println("!!! To finish the setup, please execute: !!!")
         println("./gradlew setupLocalDevelopment")
     }
 }

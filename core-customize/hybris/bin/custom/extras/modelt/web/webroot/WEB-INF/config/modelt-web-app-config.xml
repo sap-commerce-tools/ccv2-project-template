@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+ Copyright (c) 2020 SAP SE or an SAP affiliate company. All rights reserved.
+-->
+<!-- 
+  WARNING: This is the Spring WEB configuration file. If you want to replace
+  items or managers you have to do this from the extensions core configuration 
+  file (modelt/resources/modelt-spring.xml) 
+  -->
+
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans
+           http://www.springframework.org/schema/beans/spring-beans.xsd
+           http://www.springframework.org/schema/context
+           http://www.springframework.org/schema/context/spring-context.xsd">
+
+    <import resource="modelt-spring-security-config.xml"/>
+
+    <context:annotation-config/>
+
+	<!-- Spring managed FilterChain for hybris Filter stack -->
+	<bean id="modeltPlatformFilterChain" class="de.hybris.platform.servicelayer.web.PlatformFilterChain">
+		<constructor-arg>
+			<list>
+				<ref bean="log4jFilter"/>
+				<ref bean="sessionFilter"/>
+                <ref bean="modeltMediaFilter"/>
+			</list>
+		</constructor-arg>
+	</bean>
+
+    <!-- This filter is responsible for all media and secure-media handling -->
+    <bean id="modeltMediaFilter" class="de.hybris.platform.servicelayer.web.WebAppMediaFilter">
+        <property name="mediaPermissionService" ref="mediaPermissionService"/>
+        <property name="modelService" ref="modelService"/>
+        <property name="userService" ref="userService"/>
+        <property name="mediaService" ref="mediaService"/>
+        <!-- Change this it to 'true' if you want webApp contextPath to be added automatically to the URLs by the filter -->
+        <property name="addContextPath" value="false" />
+        <!--  secure media resource path prefix - __secure__ is default, but you may overwrite it -->
+        <!-- <property name="secureMediasResourcePathPrefix" value="__secure__"/> -->
+    </bean>
+
+	<!--
+	 WARNING: 
+	 Do NOT override hybris managers or items within the web module!
+	 Use always the core spring configuration file (modelt-spring.xml) in
+	 the extensions resources/ directory.
+	 -->
+</beans>

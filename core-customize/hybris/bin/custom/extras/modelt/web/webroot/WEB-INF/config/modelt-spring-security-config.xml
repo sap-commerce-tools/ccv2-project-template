@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+ Copyright (c) 2020 SAP SE or an SAP affiliate company. All rights reserved.
+-->
+<beans:beans xmlns="http://www.springframework.org/schema/security"
+             xmlns:beans="http://www.springframework.org/schema/beans"
+             xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+             xsi:schemaLocation="http://www.springframework.org/schema/security
+           https://www.springframework.org/schema/security/spring-security.xsd
+           http://www.springframework.org/schema/beans
+           http://www.springframework.org/schema/beans/spring-beans.xsd"
+>
+
+    <http pattern="/500.jsp" security="none" />
+    <http pattern="/404.jsp" security="none" />
+    <http pattern="/static/**" security="none" />
+
+    <http access-decision-manager-ref="accessDecisionManager" use-expressions="false">
+        <session-management session-authentication-strategy-ref="fixation"/>
+        <intercept-url pattern="/login.jsp" access="PERMIT_ALL"/>
+        <intercept-url pattern="/**" access="HYBRIS_NOT_INITIALIZED,ROLE_CUSTOMERGROUP"/>
+        <http-basic />
+        <form-login 
+        	always-use-default-target="false" 
+        	login-page="/login.jsp" 
+        	username-parameter="j_username"
+			password-parameter="j_password"
+			login-processing-url="/j_spring_security_check"
+        	authentication-failure-url="/login.jsp?login_error=1"
+        />
+        <remember-me services-ref="rememberMeServices" key="adminweb"/>
+        <logout logout-url="/j_spring_security_logout" logout-success-url="/login.jsp"/>
+        <csrf />
+        <headers>
+            <frame-options disabled="true"/>
+        </headers>
+    </http>
+
+    <beans:bean id="fixation" class="de.hybris.platform.servicelayer.security.spring.HybrisSessionFixationProtectionStrategy">
+        <beans:property name="migrateSessionAttributes" value="false"/>
+    </beans:bean>
+
+    <beans:bean id="accessDecisionManager" class="org.springframework.security.access.vote.AffirmativeBased">
+        <beans:constructor-arg>
+            <beans:list>
+                <beans:bean id="permitAllVoter" class="de.hybris.platform.spring.security.voter.PermitAllVoter" />
+                <beans:bean id="notInitializedVoter" class="de.hybris.platform.spring.security.voter.HybrisNotInitializedVoter" />
+                <beans:bean id="roleVoter" class="org.springframework.security.access.vote.RoleVoter" />
+                <beans:bean id="authenticatedVoter" class="org.springframework.security.access.vote.AuthenticatedVoter" />
+            </beans:list>
+        </beans:constructor-arg>
+    </beans:bean>
+
+    <beans:bean id="rememberMeServices" class="de.hybris.platform.spring.security.CoreRememberMeService">
+        <beans:property name="key" value="adminweb" />
+        <beans:property name="cookieName" value="LoginToken" />
+        <beans:lookup-method name="lookupUserDetailsService" bean="coreUserDetailsService" />
+    </beans:bean>
+
+    <authentication-manager>
+        <authentication-provider ref="coreAuthenticationProvider"/>
+    </authentication-manager>
+
+    <beans:bean id="coreAuthenticationProvider" class="de.hybris.platform.spring.security.CoreAuthenticationProvider">
+        <beans:property name="preAuthenticationChecks" ref="corePreAuthenticationChecks" />
+        <beans:property name="userDetailsService" ref="coreUserDetailsService" />
+    </beans:bean>
+
+    <beans:bean id="corePreAuthenticationChecks" class="de.hybris.platform.spring.security.RejectUserPreAuthenticationChecks">
+        <beans:property name="allowedUserGroups">
+            <beans:list>
+                <beans:value>CustomerGroup</beans:value>
+            </beans:list>
+        </beans:property>
+        <beans:property name="allowedUserTypes">
+            <beans:list>
+                <beans:value>Customer</beans:value>
+            </beans:list>
+        </beans:property>
+    </beans:bean>
+
+
+    <beans:bean id="coreUserDetailsService" class="de.hybris.platform.spring.security.CoreUserDetailsService" />
+
+</beans:beans>
