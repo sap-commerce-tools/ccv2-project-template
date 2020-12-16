@@ -1,0 +1,11 @@
+#Ant properties
+#Thu Nov 05 12:00:45 CET 2020
+version.api=2005
+vendor=hybris
+group.id=de.hybris.platform
+name=sanecleanup
+description=sanecleanup
+builddate=20201105 1200
+releasedate=20200513 1957
+version=2005.5
+module.name=platform-module

@@ -1,0 +1,27 @@
+REMOVE Customer;uid[unique=true]
+;test.dummy@domain.com
+;bob@job.com
+;essentia.data@domain.com
+;sample.data@domain.com
+;first.job@domain.com
+;second.job@domain.com
+;third.job@domain.com
+;raw.impex@domain.com
+
+REMOVE Product[batchmode=true];code[unique=true]
+;123456
+;112233
+
+REMOVE Media[batchmode=true];code[unique=true]
+;/1200Wx1200H/y_logo.png
+;/515Wx515H/y_logo.png
+;/300Wx300H/y_logo.png
+;/96Wx96H/y_logo.png
+;/65Wx65H/y_logo.png
+;/30Wx30H/y_logo.png
+
+REMOVE MediaContainer[batchmode=true];qualifier[unique=true]
+;y_logo.png
+
+REMOVE MonitorHistoryData[batchmode=true];itemType(code)[unique=true];
+;MonitorHistoryData;

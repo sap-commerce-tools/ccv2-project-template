@@ -1,0 +1,94 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+ [y] hybris Platform
+
+ Copyright (c) 2017 SAP SE or an SAP affiliate company.  All rights reserved.
+
+ This software is the confidential and proprietary information of SAP
+ ("Confidential Information"). You shall not disclose such Confidential
+ Information and shall use it only in accordance with the terms of the
+ license agreement you entered into with SAP.
+-->
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:p="http://www.springframework.org/schema/p"
+       xmlns:int="http://www.springframework.org/schema/integration"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+		http://www.springframework.org/schema/integration http://www.springframework.org/schema/integration/spring-integration.xsd">
+
+    <!-- Map files to channel based on name pattern -->
+    <bean class="org.springframework.beans.factory.config.MethodInvokingFactoryBean">
+        <property name="targetObject" ref="hotfolderInboundFileChannelMappings"/>
+        <property name="targetMethod" value="put"/>
+        <property name="arguments">
+            <list>
+                <bean class="java.util.regex.Pattern" factory-method="compile">
+                    <constructor-arg value="${cloud.hotfolder.default.mapping.file.name.pattern}" />
+                </bean>
+                <ref bean="batchFilesCloudHotFolderDefaultProc"/>
+            </list>
+        </property>
+    </bean>
+
+    <!-- Declare where the files should be moved to -->
+    <bean id="baseDirectoryCloudHotFolder" class="java.lang.String">
+        <constructor-arg value="#{baseDirectory}/${tenantId}/${cloud.hotfolder.default.mapping.root.dir}" />
+    </bean>
+
+    <int:channel id="batchFilesCloudHotFolderDefaultProc"/>
+    <int:service-activator input-channel="batchFilesCloudHotFolderDefaultProc" output-channel="batchFilesHeaderInit"
+                           ref="cloudHotFolderDefaultHeaderSetupTask" method="execute" />
+
+    <!-- Setup Header by applying required properties -->
+    <bean id="cloudHotFolderDefaultHeaderSetupTask" class="de.hybris.platform.acceleratorservices.dataimport.batch.task.HeaderSetupTask">
+        <property name="catalog" value="${cloud.hotfolder.default.mapping.header.catalog}" />
+        <property name="net" value="${cloud.hotfolder.default.mapping.header.net}" />
+        <property name="storeBaseDirectory" ref="baseDirectoryCloudHotFolder" />
+    </bean>
+
+    <!-- Create File -> Impex converters and add mappings based on file name prefix -->
+    <bean id="cloudHotFolderConfigImpexHeader" class="java.lang.String">
+        <constructor-arg>
+            <value># Import config properties into impex macros
+                UPDATE GenericItem[processor=de.hybris.platform.cloud.commons.services.impex.impl.TenantAwareConfigPropertyImportProcessor];pk[unique=true]</value>
+        </constructor-arg>
+    </bean>
+
+    <bean id="cloudHotFolderMediaConverter" parent="batchMediaConverter">
+        <property name="header">
+            <value>#{defaultImpexProductHeader}
+
+                #{cloudHotFolderConfigImpexHeader}
+                $importFolder=$config-cloud.hotfolder.default.images.root.url
+                $mediafolder=$config-cloud.hotfolder.default.images.media.folder.qualifier
+
+                INSERT_UPDATE MediaFolder;qualifier[unique=true];path[unique=true]
+                ;$mediafolder;$mediafolder
+
+                # Import media from remote file system
+                INSERT_UPDATE Media;mediaFormat(qualifier);code[unique=true];mime[default='image/jpeg'];$catalogVersion;folder(qualifier)[default=$mediafolder];realfilename;@media[translator=de.hybris.platform.impex.jalo.media.MediaDataTranslator]
+            </value>
+        </property>
+    </bean>
+
+    <bean id="cloudHotFolderMediaConverterMapping"
+          class="de.hybris.platform.acceleratorservices.dataimport.batch.converter.mapping.impl.DefaultConverterMapping"
+          p:mapping="url_media"
+          p:converter-ref="cloudHotFolderMediaConverter"/>
+
+    <bean id="cloudHotFolderMediaContainerConverterMapping"
+          class="de.hybris.platform.acceleratorservices.dataimport.batch.converter.mapping.impl.DefaultConverterMapping"
+          p:mapping="url_media"
+          p:converter-ref="batchMediaContainerConverter"/>
+
+    <bean id="cloudHotFolderMediaProductConverterMapping"
+          class="de.hybris.platform.acceleratorservices.dataimport.batch.converter.mapping.impl.DefaultConverterMapping"
+          p:mapping="url_media"
+          p:converter-ref="batchMediaProductConverter"/>
+
+    <bean id="cloudHotFolderProductConverterMapping"
+          class="de.hybris.platform.acceleratorservices.dataimport.batch.converter.mapping.impl.DefaultConverterMapping"
+          p:mapping="product"
+          p:converter-ref="batchProductConverter"/>
+
+</beans>

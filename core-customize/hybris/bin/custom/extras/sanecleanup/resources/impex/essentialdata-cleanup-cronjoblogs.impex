@@ -1,0 +1,5 @@
+INSERT CronJob; code[unique = true]      ; job(code)                 ; sessionLanguage(isoCode)[default = en]
+              ; cronJobLogCleanupCronJob ; cleanUpLogsJobPerformable ;
+INSERT Trigger; cronJob(code)[unique = true]; cronExpression
+# every hour
+              ; cronJobLogCleanupCronJob    ; 0 0 0/1 * * ?

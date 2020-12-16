@@ -1,0 +1,349 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+ [y] hybris Platform
+
+ Copyright (c) 2017 SAP SE or an SAP affiliate company.  All rights reserved.
+
+ This software is the confidential and proprietary information of SAP
+ ("Confidential Information"). You shall not disclose such Confidential
+ Information and shall use it only in accordance with the terms of the
+ license agreement you entered into with SAP.
+-->
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:int="http://www.springframework.org/schema/integration"
+       xmlns:util="http://www.springframework.org/schema/util"
+       xmlns:aop="http://www.springframework.org/schema/aop"
+       xmlns:file="http://www.springframework.org/schema/integration/file"
+
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+           http://www.springframework.org/schema/integration http://www.springframework.org/schema/integration/spring-integration.xsd
+           http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util.xsd
+           http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop.xsd
+            http://www.springframework.org/schema/integration/file
+            http://www.springframework.org/schema/integration/file/spring-integration-file.xsd">
+
+
+	<!-- Local and Remote Path properties -->
+
+	<bean id="azureHotfolderRemotePath" class="java.lang.String">
+		<constructor-arg name="value"
+		                 value="${azure.hotfolder.storage.container.hotfolder}"/>
+	</bean>
+
+	<bean id="azureHotfolderProcessingRemotePath" class="java.lang.String">
+		<constructor-arg name="value"
+		                 value="${azure.hotfolder.storage.container.hotfolder}/processing"/>
+	</bean>
+
+	<bean id="azureHotfolderErrorRemotePath" class="java.lang.String">
+		<constructor-arg name="value"
+		                 value="${azure.hotfolder.storage.container.hotfolder}/error"/>
+	</bean>
+
+	<bean id="azureHotfolderArchiveRemotePath" class="java.lang.String">
+		<constructor-arg name="value"
+		                 value="${azure.hotfolder.storage.container.hotfolder}/archive"/>
+	</bean>
+
+	<bean id="azureHotfolderUnmappedRemotePath" class="java.lang.String">
+		<constructor-arg name="value"
+		                 value="${azure.hotfolder.storage.container.hotfolder}/unmappped"/>
+	</bean>
+
+	<bean id="azureHotfolderLocalDirectoryBase" class="java.lang.String">
+		<constructor-arg name="value"
+		                 value="#{configurationService.configuration.getProperty('azure.hotfolder.local.sync.basefolder')}"/>
+	</bean>
+
+
+	<!-- Azure Account, Client and Session -->
+
+	<bean id="azureHotFolderStorageAccount"
+	      class="com.microsoft.azure.storage.CloudStorageAccount"
+	      factory-method="parse">
+		<constructor-arg name="connectionString"
+		                 value="${azure.hotfolder.storage.account.connection-string}"/>
+	</bean>
+
+	<bean id="azureHotFolderBlobClient"
+	      factory-bean="azureHotFolderStorageAccount"
+	      factory-method="createCloudBlobClient"/>
+
+	<bean id="azureHotFolderBlobSession"
+	      class="de.hybris.platform.cloud.azure.hotfolder.remote.session.AzureBlobSession">
+		<constructor-arg name="client"
+		                 ref="azureHotFolderBlobClient"/>
+		<constructor-arg name="containerName"
+		                 value="${azure.hotfolder.storage.container.name}"/>
+		<constructor-arg name="createContainerIfNotExists"
+		                 value="${azure.hotfolder.storage.container.create}"/>
+	</bean>
+
+	<alias name="defaultAzureBlobSessionFactory" alias="azureBlobSessionFactory"/>
+	<bean id="defaultAzureBlobSessionFactory"
+	      class="de.hybris.platform.cloud.azure.hotfolder.remote.session.AzureBlobSessionFactory">
+		<constructor-arg name="blobSession" ref="azureHotFolderBlobSession"/>
+	</bean>
+
+
+	<!-- Filter chain for filtering remote files before synchronisation -->
+
+	<alias name="defaultAzureBlobRegexPatternFileListFilter" alias="azureBlobRegexPatternFileListFilter"/>
+	<bean id="defaultAzureBlobRegexPatternFileListFilter"
+	      class="de.hybris.platform.cloud.azure.hotfolder.remote.file.filters.AzureBlobRegexPatternFileListFilter">
+		<constructor-arg name="pattern" value="${azure.hotfolder.storage.container.match.pattern}"/>
+	</bean>
+
+
+	<alias name="simpleHotfolderMetadataStore" alias="hotfolderMetadataStore"/>
+	<!--
+		 Use the simple metadata store if you expect a high freqency of many, small files.
+		 The simple metadata store uses an in-memory, concurrent map as a store. This provides
+		 considerable performance benefits when compared to the hybris persistent store.
+		 However, the store is not cluster wide, and is lost on restarts.
+	-->
+	<bean id="simpleHotfolderMetadataStore"
+	      class="de.hybris.platform.cloud.commons.spring.integration.metadata.ExpiringSimpleMetadataStore">
+		<constructor-arg name="maxSize" value="${cloud.hotfolder.metadata.max-size}"/>
+		<constructor-arg name="ttl" value="${cloud.hotfolder.metadata.ttl}"/>
+	</bean>
+
+	<!--
+		 Use the persistent metadata store if you expect a low volume of files and you
+		 need to cluster-wide, persistent and guaranteed once only processing.
+	-->
+	<bean id="persistenHotfolderMetadataStore"
+	      parent="abstractHybrisMetadataStore">
+		<constructor-arg name="region" value="${azure.hotfolder.storage.metadatastore.region}"/>
+	</bean>
+
+	<alias name="defaultAzureBlobPersistentAcceptOnceListFilter"
+	       alias="azureBlobPersistentAcceptOnceListFilter"/>
+	<bean id="defaultAzureBlobPersistentAcceptOnceListFilter"
+	      class="de.hybris.platform.cloud.azure.hotfolder.remote.file.filters.AzureBlobPersistentAcceptOnceListFilter">
+		<constructor-arg name="store" ref="hotfolderMetadataStore"/>
+		<constructor-arg name="prefix" value="${azure.hotfolder.storage.metadatastore.prefix}"/>
+	</bean>
+
+	<alias name="defaultAzureFileFilterList" alias="azureHotfolderFileFilterList"/>
+	<util:list id="defaultAzureFileFilterList">
+		<ref bean="azureBlobRegexPatternFileListFilter"/>
+		<ref bean="azureBlobPersistentAcceptOnceListFilter"/>
+	</util:list>
+
+	<alias name="azureChainFileListFilter" alias="azureHotfolderFileFilter"/>
+	<bean id="azureChainFileListFilter"
+	      class="de.hybris.platform.cloud.commons.spring.integration.file.filters.ChainFileListFilter">
+		<constructor-arg name="fileFilters" ref="azureHotfolderFileFilterList"/>
+	</bean>
+
+
+	<!-- Comparator chain for comparing remote files before synchronisation -->
+
+	<bean id="azureHotFolderFileNamePrefixComparator"
+	      class="de.hybris.platform.cloud.azure.hotfolder.remote.file.comparators.AzureBlobNameComparatorAdapter">
+		<constructor-arg name="comparator" ref="cloudHotFolderNamePrefixComparator"/>
+	</bean>
+
+	<bean id="azureHotFolderFileNameComparator"
+	      class="de.hybris.platform.cloud.azure.hotfolder.remote.file.comparators.AzureBlobNameComparatorAdapter">
+		<constructor-arg name="comparator" ref="cloudHotFolderNameComparator"/>
+	</bean>
+
+	<bean id="azureHotFolderFileNameSequenceComparator"
+	      class="de.hybris.platform.cloud.azure.hotfolder.remote.file.comparators.AzureBlobNameComparatorAdapter">
+		<constructor-arg name="comparator" ref="cloudHotFolderNameSequenceComparator"/>
+	</bean>
+
+	<bean id="azureHotFolderFileModifiedComparator"
+	      class="de.hybris.platform.cloud.azure.hotfolder.remote.file.comparators.AzureBlobTimestampComparatorAdapter">
+		<constructor-arg name="comparator" ref="cloudHotFolderModifiedComparator"/>
+	</bean>
+
+	<alias name="defaultAzureHotFolderFileComparatorList" alias="azureHotFolderFileComparatorList"/>
+	<util:list id="defaultAzureHotFolderFileComparatorList">
+		<ref bean="azureHotFolderFileNamePrefixComparator"/>
+		<ref bean="azureHotFolderFileNameComparator"/>
+		<ref bean="azureHotFolderFileNameSequenceComparator"/>
+		<ref bean="azureHotFolderFileModifiedComparator"/>
+	</util:list>
+
+	<alias name="azureHotFolderFileComparatorChain" alias="azureHotFolderFileComparator"/>
+	<bean id="azureHotFolderFileComparatorChain" class="org.apache.commons.collections4.comparators.ComparatorChain">
+		<constructor-arg ref="azureHotFolderFileComparatorList"/>
+	</bean>
+
+
+	<!-- Azure Inbound File Synchronizer and Channel Adapter -->
+
+	<alias name="defaultAzureBlobInboundSynchronizer" alias="azureBlobInboundSynchronizer"/>
+	<bean id="defaultAzureBlobInboundSynchronizer"
+	      class="de.hybris.platform.cloud.azure.hotfolder.remote.inbound.AzureBlobInboundSynchronizer">
+		<constructor-arg name="sessionFactory" ref="azureBlobSessionFactory"/>
+		<property name="remoteDirectory" value="#{azureHotfolderRemotePath}"/>
+		<property name="moveToRemoteDirectory" value="#{azureHotfolderProcessingRemotePath}"/>
+		<property name="deleteRemoteFiles" value="${azure.hotfolder.storage.delete.remote.files}"/>
+		<property name="preserveTimestamp" value="true"/>
+		<property name="filter" ref="azureHotfolderFileFilter"/>
+		<property name="comparator" ref="azureHotFolderFileComparator"/>
+	</bean>
+
+	<alias name="defaultAzureBlobSynchronizingMessageSource" alias="azureBlobSynchronizingMessageSource"/>
+	<bean id="defaultAzureBlobSynchronizingMessageSource"
+	      class="de.hybris.platform.cloud.azure.hotfolder.remote.inbound.AzureBlobSynchronizingMessageSource">
+		<constructor-arg name="synchronizer" ref="azureBlobInboundSynchronizer"/>
+		<property name="autoCreateLocalDirectory" value="true"/>
+		<property name="localDirectory"
+		          value="#{azureHotfolderLocalDirectoryBase}/#{azureHotfolderRemotePath}"/>
+		<property name="maxFetchSize" value="${azure.hotfolder.storage.polling.fetch.batch-size}"/>
+	</bean>
+
+	<int:inbound-channel-adapter id="azureInboundChannelAdapter"
+	                             auto-startup="false"
+	                             role="${cloud.hotfolder.storage.services.role}"
+	                             phase="50"
+	                             ref="azureBlobSynchronizingMessageSource"
+	                             channel="cloudHotfolderInboundFileHeaderEnricherChannel">
+		<int:poller fixed-rate="${azure.hotfolder.storage.polling.fixed.rate}"
+		            task-executor="azureChannelAdapterTaskExecutor"
+		            max-messages-per-poll="${azure.hotfolder.storage.polling.fetch.batch-size}"/>
+	</int:inbound-channel-adapter>
+
+	<bean id="azureChannelAdapterTaskExecutor"
+	      class="de.hybris.platform.cloud.commons.scheduling.HybrisAwareThreadPoolTaskExecutor">
+		<property name="waitForTasksToCompleteOnShutdown" value="true"/>
+		<property name="threadNamePrefix" value="AzureIntegrationTaskExecutorThread-${tenantId}-"/>
+		<property name="threadGroupName" value="AzureIntegrationTaskExecutor-${tenantId}"/>
+        <property name="corePoolSize" value="${azure.hotfolder.storage.polling.core-pool-size}"/>
+        <property name="maxPoolSize" value="${azure.hotfolder.storage.polling.max-pool-size}"/>
+		<property name="queueCapacity" value="-1"/>
+		<property name="keepAliveSeconds" value="60"/>
+		<property name="rejectedExecutionHandler">
+			<bean class="java.util.concurrent.ThreadPoolExecutor$DiscardPolicy"/>
+		</property>
+		<property name="role" value="integration"/>
+		<property name="autoStartup" value="false"/>
+		<property name="phase" value="10"/>
+		<property name="awaitTerminationSeconds" value="60"/>
+	</bean>
+
+	<!--A channel interceptor against the header used in the azure messaging flow for
+        supporting archive and error functionality-->
+	<int:channel id="cloudHotfolderInboundFileHeaderEnricherChannel">
+		<int:interceptors>
+			<ref bean="azureHotFolderRoutingChannelInterceptor"/>
+		</int:interceptors>
+	</int:channel>
+
+	<bean id="azureHotFolderRoutingChannelInterceptor" class="de.hybris.platform.cloud.hotfolder.interceptor.HotFolderRouterChannelInterceptor">
+		<property name="successChannel" ref="azureArchiveOutboundChannelAdapter"/>
+		<property name="failureChannel" ref="azureErrorOutboundChannelAdapter"/>
+	</bean>
+
+	<!--Provide a backwards compatible synchronization factory, routing existing configuration
+        using transaction manager supported archive and error functionality, to the null channel. This avoids
+        duplication of items in the archive and error folders which are now supported through
+        a channel interceptor on the poller configured output channel - the cloud header enricher.-->
+	<int:transaction-synchronization-factory id="defaultAzureSynchronizationFactory">
+		<int:after-commit channel="nullChannel"/>
+		<int:after-rollback channel="nullChannel"/>
+	</int:transaction-synchronization-factory>
+
+	<bean id="azurePsuedoTxManager"
+		  class="org.springframework.integration.transaction.PseudoTransactionManager"/>
+
+	<!-- Azure Outbound Channel adapters for moving remote files into archive/error folders -->
+
+	<bean id="abstractAzureMoveMessageHandler" abstract="true"
+	      class="de.hybris.platform.cloud.azure.hotfolder.remote.outbound.AzureBlobRemoteMoveMessageHandler">
+		<constructor-arg ref="azureBlobSessionFactory"/>
+		<property name="remoteDirectory" ref="azureHotfolderArchiveRemotePath"/>
+		<property name="fileNameGenerator" ref="azureTimestampFileNameGenerator"/>
+	</bean>
+
+	<bean id="azureTimestampFileNameGenerator"
+	      class="de.hybris.platform.cloud.hotfolder.spring.integration.file.TimestampFileNameGenerator">
+		<property name="headerName"
+		          value="#{T(org.springframework.integration.file.FileHeaders).REMOTE_FILE}"/>
+	</bean>
+
+	<alias name="defaultAzureArchiveMessageHandler" alias="azureArchiveMessageHandler"/>
+	<bean id="defaultAzureArchiveMessageHandler" parent="abstractAzureMoveMessageHandler">
+		<property name="remoteDirectory" ref="azureHotfolderArchiveRemotePath"/>
+	</bean>
+
+	<alias name="defaultAzureErrorMessageHandler" alias="azureErrorMessageHandler"/>
+	<bean id="defaultAzureErrorMessageHandler" parent="abstractAzureMoveMessageHandler">
+		<property name="remoteDirectory" ref="azureHotfolderErrorRemotePath"/>
+	</bean>
+
+	<alias name="defaultAzureUnmappedMessageHandler" alias="azureUnmappedMessageHandler"/>
+	<bean id="defaultAzureUnmappedMessageHandler" parent="abstractAzureMoveMessageHandler">
+		<property name="remoteDirectory" ref="azureHotfolderUnmappedRemotePath"/>
+	</bean>
+
+	<int:outbound-channel-adapter id="azureArchiveOutboundChannelAdapter"
+	                              ref="azureArchiveMessageHandler"/>
+
+	<int:outbound-channel-adapter id="azureErrorOutboundChannelAdapter"
+	                              ref="azureErrorMessageHandler"/>
+
+	<!-- Azure Inbound Channel adapters for moving locally produced files 'error_' to the remote error folder -->
+
+	<file:inbound-channel-adapter id="azureLocalErrorInboundChannelAdapter"
+                                  directory="#{azureHotfolderLocalDirectoryBase}/${tenantId}/error"
+                                  filter="azureLocalErrorHotFolderFileFilter">
+        <int:poller fixed-rate="10000"/>
+    </file:inbound-channel-adapter>
+
+	<!--
+		Filter chain for filtering special error files produced after synchronisation and impex transformation,
+		before uploading them from the local filesystem to the remote location
+ 	-->
+
+	<bean id="azureLocalErrorHotFolderFileFilter"
+		  class="de.hybris.platform.cloud.commons.spring.integration.file.filters.ChainFileListFilter">
+		<constructor-arg name="fileFilters" ref="azureLocalErrorFolderFileListFilter"/>
+	</bean>
+
+	<util:list id="azureLocalErrorFolderFileListFilter">
+		<ref bean="azureLocalErrorRegexPatternFileListFilter"/>
+		<ref bean="azureFileSystemPersistentAcceptOnceListFilter"/>
+	</util:list>
+
+	<bean id="azureLocalErrorRegexPatternFileListFilter"
+		  class="org.springframework.integration.file.filters.RegexPatternFileListFilter">
+		<constructor-arg name="pattern" value="${azure.hotfolder.local.sync.error.match.pattern}"/>
+	</bean>
+
+	<bean id="azureFileSystemPersistentAcceptOnceListFilter" class="org.springframework.integration.file.filters.FileSystemPersistentAcceptOnceFileListFilter">
+		<constructor-arg name="store" ref="hotfolderMetadataStore"/>
+		<constructor-arg name="prefix" value="${azure.hotfolder.storage.metadatastore.prefix}"/>
+	</bean>
+
+	<!-- Azure Outbound Channel adapters for moving local error files into the error folder -->
+
+	<int:outbound-channel-adapter id="azureLocalErrorOutboundChannelAdapter"
+                                  channel="azureLocalErrorInboundChannelAdapter" ref="azureBlobMessageHandler"/>
+
+    <bean id="azureBlobMessageHandler" class="de.hybris.platform.cloud.azure.hotfolder.remote.outbound.AzureBlobMessageHandler">
+        <constructor-arg ref="azureBlobSessionFactory"/>
+        <property name="remoteDirectory" ref="azureHotfolderErrorRemotePath"/>
+        <property name="fileNameGenerator" ref="azureTimestampFileNameGenerator"/>
+        <property name="deleteSourceFiles" value="true"/>
+    </bean>
+
+	<!-- AOP Aspect for monitoring the progress of blob transfer operations -->
+
+	<bean id="blobTransferredAspect"
+	      parent="abstractMonitoringAspect"
+	      class="de.hybris.platform.cloud.azure.hotfolder.aop.BlobTransferredAspect"/>
+
+	<aop:config>
+		<aop:aspect ref="blobTransferredAspect">
+			<aop:around method="aroundRead" pointcut="bean(azureHotFolderBlobSession) and execution(* read(..)) and args(path,..)"/>
+		</aop:aspect>
+	</aop:config>
+
+</beans>

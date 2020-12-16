@@ -1,0 +1,91 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+ [y] hybris Platform
+
+ Copyright (c) 2017 SAP SE or an SAP affiliate company.  All rights reserved.
+
+ This software is the confidential and proprietary information of SAP
+ ("Confidential Information"). You shall not disclose such Confidential
+ Information and shall use it only in accordance with the terms of the
+ license agreement you entered into with SAP.
+-->
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:int="http://www.springframework.org/schema/integration"
+       xmlns:util="http://www.springframework.org/schema/util"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+           http://www.springframework.org/schema/integration http://www.springframework.org/schema/integration/spring-integration.xsd
+
+ 		   http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util.xsd">
+
+    <bean id="fileNameHeaderKey" class="java.lang.String">
+        <constructor-arg
+                value="#{T(de.hybris.platform.cloud.hotfolder.spring.integration.file.CloudFileHeaders).FILENAME}"/>
+    </bean>
+
+    <bean id="fileLastModifiedHeaderKey" class="java.lang.String">
+        <constructor-arg
+                value="#{T(de.hybris.platform.cloud.hotfolder.spring.integration.file.CloudFileHeaders).LAST_MODIFIED}"/>
+    </bean>
+
+    <int:channel id="hotfolderInboundFileHeaderEnricherChannel"/>
+    <int:channel id="cloudHotfolderInboundFileHeaderEnricherChannel"/>
+
+    <!--Provide a backwards compatible header for existing configuration,
+        utilising the transaction manager for archive and error functionality.
+        We recommend updating poller configuration to send files to the new header enricher,
+        which is intercepted by channel interceptor.-->
+    <int:header-enricher id="hotfolderInboundFileNameHeaderEnricherChannel"
+                         input-channel="hotfolderInboundFileHeaderEnricherChannel"
+                         output-channel="hotfolderInboundFileChannel">
+        <int:header name="#{fileNameHeaderKey}" expression="payload.getName()"/>
+        <int:header name="#{fileLastModifiedHeaderKey}" expression="payload.lastModified()"/>
+    </int:header-enricher>
+
+    <!--Provide a header to support the new and preferred way of providing archive and error
+        functionality using channel interceptors.-->
+    <int:header-enricher id="cloudHotfolderInboundFileNameHeaderEnricherChannel"
+                         input-channel="cloudHotfolderInboundFileHeaderEnricherChannel"
+                         output-channel="hotfolderInboundFileChannel">
+        <int:header name="#{fileNameHeaderKey}" expression="payload.getName()"/>
+        <int:header name="#{fileLastModifiedHeaderKey}" expression="payload.lastModified()"/>
+    </int:header-enricher>
+
+    <int:router id="hotfolderInboundMessageRouter"
+                input-channel="hotfolderInboundFileChannel"
+                ref="hotfolderFileNameHeaderValueRouter"/>
+
+    <bean id="hotfolderFileNameHeaderValueRouter"
+          class="org.springframework.integration.router.HeaderValueRouter">
+        <constructor-arg ref="fileNameHeaderKey"/>
+        <property name="channelResolver" ref="hotfolderInboundFilePatternMatchingChannelResolver"/>
+        <property name="resolutionRequired" value="${cloud.hotfolder.storage.header.router.resolution.required}"/>
+        <property name="defaultOutputChannel" ref="unmappedHotFolderChannel"/>
+    </bean>
+    
+    <alias name="defaultHotfolderInboundFileChannelMappings"
+           alias="hotfolderInboundFileChannelMappings"/>
+    <util:map id="defaultHotfolderInboundFileChannelMappings"
+              key-type="java.util.regex.Pattern"
+              value-type="org.springframework.messaging.MessageChannel" />
+
+    <bean id="hotfolderInboundFilePatternMatchingChannelResolver"
+          class="de.hybris.platform.cloud.commons.spring.messaging.core.impl.PatternMatchingDestinationResolver">
+        <constructor-arg>
+            <bean class="org.springframework.messaging.core.CachingDestinationResolverProxy">
+                <constructor-arg>
+                    <bean class="org.springframework.integration.support.channel.BeanFactoryChannelResolver"/>
+                </constructor-arg>
+            </bean>
+        </constructor-arg>
+        <constructor-arg ref="hotfolderInboundFileChannelMappings"/>
+    </bean>
+
+    <bean id="unmappedHotFolderChannel"
+          class="de.hybris.platform.cloud.hotfolder.spring.messaging.support.impl.UnmappedHotfolderChannel">
+        <property name="fileNameHeaderKey" ref="fileNameHeaderKey"/>
+        <property name="fileLastModifiedHeaderKey" ref="fileLastModifiedHeaderKey"/>
+        <property name="monitorService" ref="monitorService"/>
+    </bean>
+
+</beans>

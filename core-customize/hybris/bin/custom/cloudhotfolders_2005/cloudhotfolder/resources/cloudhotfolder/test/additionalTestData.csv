@@ -1,0 +1,37 @@
+INSERT_UPDATE ProductTaxGroup;code[unique=true]
+;jp-vat-full
+
+INSERT_UPDATE Title;code[unique=true];name[lang=de];name[lang=en];;
+;mr;Mr.;mr.;;
+;mrs;Mrs.;mrs.;;
+
+INSERT_UPDATE BaseStore;uid[unique=true];
+;testStore;
+
+INSERT_UPDATE BaseSite;uid[unique=true];stores(uid)
+;testSite;testStore
+
+$productCatalogId=testProductCatalog
+$contentCatalogId=testContentCatalog
+
+INSERT_UPDATE Catalog;id[unique=true];name[lang=de];name[lang=en];defaultCatalog
+;$productCatalogId;$productCatalogId;$productCatalogId;true
+;$contentCatalogId;$contentCatalogId;$contentCatalogId;true
+
+INSERT_UPDATE CatalogVersion; catalog(id)[unique=true]; version[unique=true]; active;defaultCurrency(isocode)
+;$productCatalogId;Staged;true;EUR;de,en
+;$productCatalogId;Online;true;EUR;de,en
+;$contentCatalogId;Staged;true;EUR;de,en
+;$contentCatalogId;Online;true;EUR;de,en
+
+INSERT_UPDATE MediaFolder;qualifier[unique=true];path[unique=true]
+;images;images
+
+INSERT_UPDATE MediaFormat;qualifier[unique=true]
+;1200Wx1200H
+;515Wx515H
+;365Wx246H
+;300Wx300H
+;96Wx96H
+;65Wx65H
+;30Wx30H

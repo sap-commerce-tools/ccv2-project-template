@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<!--
+ [y] hybris Platform
+
+ Copyright (c) 2017 SAP SE or an SAP affiliate company.  All rights reserved.
+
+ This software is the confidential and proprietary information of SAP
+ ("Confidential Information"). You shall not disclose such Confidential
+ Information and shall use it only in accordance with the terms of the
+ license agreement you entered into with SAP.
+-->
+<!--
+	ATTENTION: This is just an example file. You have to edit it according to your needs.
+-->
+
+<beans xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="beans.xsd">
+
+    <enum class="de.hybris.platform.cloud.commons.services.monitor.Status">
+        <value>IN_PROGRESS</value>
+        <value>SUCCESS</value>
+        <value>FAILURE</value>
+        <value>WARNING</value>
+    </enum>
+
+    <enum class="de.hybris.platform.cloud.commons.services.monitor.SystemArea">
+        <value>INTEGRATION</value>
+    </enum>
+
+    <enum class="de.hybris.platform.cloud.commons.services.monitor.Step">
+        <value>PROCESS</value>
+    </enum>
+
+    <bean class="de.hybris.platform.cloud.commons.services.monitor.MonitorHistoryEntryActionData" template="resources/bean-builder-template.vm">
+        <property name="pk" type="de.hybris.platform.core.PK"/>
+        <property name="code" type="java.lang.String"/>
+        <property name="status" type="de.hybris.platform.cloud.commons.services.monitor.Status"/>
+        <property name="started" type="java.util.Date"/>
+        <property name="ended" type="java.util.Date"/>
+        <property name="duration" type="java.lang.Long"/>
+        <property name="message" type="java.lang.String"/>
+    </bean>
+
+    <bean class="de.hybris.platform.cloud.commons.services.monitor.MonitorHistoryEntryData" template="resources/bean-builder-template.vm">
+        <property name="pk" type="de.hybris.platform.core.PK"/>
+        <property name="step" type="de.hybris.platform.cloud.commons.services.monitor.Step"/>
+        <property name="status" type="de.hybris.platform.cloud.commons.services.monitor.Status"/>
+        <property name="started" type="java.util.Date"/>
+        <property name="ended" type="java.util.Date"/>
+        <property name="duration" type="java.lang.Long"/>
+        <property name="nodeId" type="java.lang.Integer"/>
+        <property name="message" type="java.lang.String"/>
+        <property name="actions" type="java.util.List&lt;de.hybris.platform.cloud.commons.services.monitor.MonitorHistoryEntryActionData>"/>
+    </bean>
+
+    <bean class="de.hybris.platform.cloud.commons.services.monitor.MonitorHistoryData">
+        <property name="pk" type="de.hybris.platform.core.PK"/>
+        <property name="key" type="java.lang.String"/>
+        <property name="systemArea" type="de.hybris.platform.cloud.commons.services.monitor.SystemArea"/>
+        <property name="status" type="de.hybris.platform.cloud.commons.services.monitor.Status"/>
+        <property name="statusWhenResumed" type="de.hybris.platform.cloud.commons.services.monitor.Status"/>
+        <property name="entries" type="java.util.List&lt;de.hybris.platform.cloud.commons.services.monitor.MonitorHistoryEntryData>"/>
+        <property name="exception" type="java.lang.Throwable"/>
+        <property name="exceptionMessage" type="java.lang.String"/>
+    </bean>
+
+    <bean class="de.hybris.platform.cloud.commons.services.monitor.logging.LogData" template="resources/bean-builder-template.vm">
+        <property name="processedMessage" type="java.lang.String"/>
+        <property name="exceptionMessage" type="java.lang.String"/>
+        <property name="exception" type="java.lang.Throwable"/>
+    </bean>
+
+</beans>

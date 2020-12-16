@@ -1,47 +1,45 @@
+import { BrowserModule, BrowserTransferStateModule } from '@angular/platform-browser';
 import { NgModule } from '@angular/core';
-import { BrowserModule } from '@angular/platform-browser';
-import { translationChunksConfig, translations } from '@spartacus/assets';
-import { OccConfig } from '@spartacus/core';
-import { B2cStorefrontModule } from '@spartacus/storefront';
-import { environment } from '../environments/environment';
+
 import { AppComponent } from './app.component';
+import { translations, translationChunksConfig } from '@spartacus/assets';
+import { B2cStorefrontModule } from '@spartacus/storefront';
+import { OccConfig } from '@spartacus/core';
+import { environment } from 'src/environments/environment';
 
 const occConfig: OccConfig = { backend: { occ: {} } };
-
 // only provide the `occ.baseUrl` key if it is explicitly configured, otherwise the value of
 // <meta name="occ-backend-base-url" > is ignored.
 // This in turn breaks the deployment in CCv2
+// https://github.com/SAP/spartacus/issues/5886
+occConfig.backend.occ.prefix = '/occ/v2/'
 if (environment.occBaseUrl) {
   occConfig.backend.occ.baseUrl = environment.occBaseUrl;
 }
-
 @NgModule({
-  declarations: [AppComponent],
+  declarations: [
+    AppComponent
+  ],
   imports: [
-    BrowserModule,
+    BrowserModule.withServerTransition({ appId: 'serverApp' }),
     B2cStorefrontModule.withConfig({
       backend: occConfig.backend,
-      authentication: {
-        client_id: 'mobile_android',
-        client_secret: 'secret',
-      },
       context: {
-        baseSite: ['electronics-spa'],
+        currency: ['USD'],
+        language: ['en'],
       },
       i18n: {
         resources: translations,
         chunks: translationChunksConfig,
-        fallbackLang: 'en',
+        fallbackLang: 'en'
       },
       features: {
-        level: '1.2',
-      },
-      personalization: {
-        enabled: true,
-      },
+        level: '2.1'
+      }
     }),
+    BrowserTransferStateModule,
   ],
   providers: [],
-  bootstrap: [AppComponent],
+  bootstrap: [AppComponent]
 })
-export class AppModule {}
+export class AppModule { }

@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+ [y] hybris Platform
+
+ Copyright (c) 2017 SAP SE or an SAP affiliate company.  All rights reserved.
+
+ This software is the confidential and proprietary information of SAP
+ ("Confidential Information"). You shall not disclose such Confidential
+ Information and shall use it only in accordance with the terms of the
+ license agreement you entered into with SAP.
+-->
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans
+       http://www.springframework.org/schema/beans/spring-beans.xsd">
+
+    <!-- database lock and leader elector to control concurrent access to hotfolder files -->
+    <bean id="cloudHotfoldersLeaderLockRepository"
+          class="de.hybris.platform.cloud.commons.spring.integration.support.locks.database.HybrisLockRepository">
+        <property name="region" value="${cloud.hotfolder.locking.dblock.region}"/>
+        <property name="ttl" value="${cloud.hotfolder.locking.dblock.ttl}"/>
+        <property name="modelService" ref="modelService"/>
+        <property name="applicationResourceLockDao" ref="applicationResourceLockDao"/>
+        <property name="role" value="integration"/>
+        <property name="autoStartup" value="false"/>
+        <property name="phase" value="20"/>
+    </bean>
+
+    <bean id="cloudHotfoldersLeaderLockRegistry"
+          class="org.springframework.integration.jdbc.lock.JdbcLockRegistry">
+        <constructor-arg name="client" ref="cloudHotfoldersLeaderLockRepository"/>
+    </bean>
+
+    <alias name="defaultHotfolderLeaderInitiator" alias="hotfolderLeaderInitiator"/>
+    <bean id="defaultHotfolderLeaderInitiator"
+          class="de.hybris.platform.cloud.commons.spring.integration.support.leader.RoleAwareLockRegistryLeaderInitiator">
+        <constructor-arg name="locks" ref="cloudHotfoldersLeaderLockRegistry"/>
+        <constructor-arg name="childRole" value="${cloud.hotfolder.storage.services.role}"/>
+        <property name="autoStartup" value="false"/>
+        <property name="role" value="yHotfolderCandidate"/>
+        <property name="phase" value="40"/>
+        <property name="heartBeatMillis" value="${cloud.hotfolder.leader.heartbeat}"/>
+        <property name="busyWaitMillis" value="${cloud.hotfolder.leader.busywait}"/>
+    </bean>
+
+    <!-- Declare Import & Impex Services that we can intercept through AOP for monitoring issues on individual files -->
+    <bean id="aopMonitoringImportService" parent="defaultImportService" />
+
+    <bean id="fileBasedSetupImpexService"
+          class="de.hybris.platform.cloud.hotfolder.dataimport.batch.zip.service.impl.FileBasedSetupImpexService" parent="defaultSetupImpexService">
+        <property name="importService" ref="aopMonitoringImportService"/>
+    </bean>
+
+    <!--Redefine OOTB hotfolder impex runner so can inject AOP import service-->
+    <bean id="batchRunnerTask" primary="true"
+          class="de.hybris.platform.acceleratorservices.dataimport.batch.task.AbstractImpexRunnerTask">
+        <property name="sessionService" ref="sessionService" />
+        <property name="importService" ref="aopMonitoringImportService" />
+        <lookup-method name="getImportConfig" bean="importConfig" />
+    </bean>
+
+    <!-- Redefine the OOTB Cleanup helper so we can re-upload the files to azure -->
+    <bean id="cleanupHelper" primary="true"
+          class="de.hybris.platform.cloud.hotfolder.batch.task.CloudCleanupHelper">
+        <property name="timeStampFormat" value="yyyyMMddHHmmssSSS" />
+    </bean>
+
+    <import resource="cloudhotfolder/integration/hot-folder-file-sorting.xml"/>
+    <import resource="cloudhotfolder/integration/hot-folder-file-routing-spring.xml"/>
+    <import resource="cloudhotfolder/integration/hot-folder-default-mapping.xml"/>
+    <import resource="cloudhotfolder/integration/hot-folder-zip-mapping.xml"/>
+    <import resource="cloudhotfolder/integration/hot-folder-aop.xml"/>
+
+</beans>

@@ -1,0 +1,227 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<!--
+ [y] hybris Platform
+
+ Copyright (c) 2017 SAP SE or an SAP affiliate company.  All rights reserved.
+
+ This software is the confidential and proprietary information of SAP
+ ("Confidential Information"). You shall not disclose such Confidential
+ Information and shall use it only in accordance with the terms of the
+ license agreement you entered into with SAP.
+-->
+<!--
+	ATTENTION: This is just an example file. You have to edit it according to your needs.
+-->
+
+<items 	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+			xsi:noNamespaceSchemaLocation="items.xsd">
+
+	<enumtypes>
+
+		<enumtype code="MonitorStatus" dynamic="false">
+			<value code="IN_PROGRESS" />
+			<value code="SUCCESS" />
+			<value code="FAILURE" />
+			<value code="WARNING" />
+		</enumtype>
+
+		<enumtype code="MonitorSystemArea" dynamic="false">
+			<value code="INTEGRATION" />
+		</enumtype>
+
+		<enumtype code="MonitorStep" dynamic="false">
+			<value code="PROCESS" />
+		</enumtype>
+
+	</enumtypes>
+
+	<relations>
+
+		<relation code="MonitorHistoryData2Entry" localized="false">
+			<sourceElement type="MonitorHistoryData" qualifier="monitorHistoryData" cardinality="one" ordered="false"/>
+			<targetElement type="MonitorHistoryEntryData" qualifier="entries" cardinality="many" ordered="true" collectiontype="list">
+				<modifiers partof="true"/>
+			</targetElement>
+		</relation>
+
+		<relation code="MonitorHistoryEntryData2Action" localized="false">
+			<sourceElement type="MonitorHistoryEntryData" qualifier="monitorHistoryEntryData" cardinality="one" ordered="false"/>
+			<targetElement type="MonitorHistoryEntryActionData" qualifier="actions" cardinality="many" ordered="true" collectiontype="list">
+				<modifiers partof="true"/>
+			</targetElement>
+		</relation>
+
+	</relations>
+
+	<itemtypes>
+
+		<itemtype code="ApplicationResourceLock"
+				  extends="GenericItem"
+                  autocreate="true"
+				  generate="true"
+				  jaloclass="de.hybris.platform.cloud.commons.jalo.ApplicationResourceLock">
+			<description>Lock for controlling access to an application resource</description>
+			<deployment table="ApplicationResourceLock" typecode="6755"/>
+			<attributes>
+				<attribute qualifier="region" type="java.lang.String">
+					<description>The scope of the lock</description>
+					<persistence type="property"/>
+					<modifiers optional="false" write="false" initial="true"/>
+				</attribute>
+				<attribute qualifier="lockKey" type="java.lang.String">
+					<description>The key of the lock</description>
+					<persistence type="property"/>
+					<modifiers optional="false" write="false" initial="true"/>
+				</attribute>
+				<attribute qualifier="clusterId" type="java.lang.Integer">
+					<description>The cluster node that holds the lock</description>
+					<persistence type="property"/>
+					<modifiers optional="false" write="false" initial="true"/>
+				</attribute>
+				<attribute qualifier="timestamp" type="java.util.Date">
+					<description>The last-used timestamp for the lock</description>
+					<persistence type="property"/>
+					<modifiers unique="false" optional="false" write="true" initial="true"/>
+				</attribute>
+			</attributes>
+			<indexes>
+				<index name="ApplicationResourceLock_region_lockKey" unique="true">
+					<key attribute="region"/>
+					<key attribute="lockKey"/>
+				</index>
+			</indexes>
+		</itemtype>
+
+		<itemtype code="MetadataStoreEntry" extends="GenericItem" jaloclass="de.hybris.platform.cloud.commons.jalo.MetadataStoreEntry">
+			<description>Metadata recording which files have already been received by the system</description>
+			<deployment table="MetadataStoreEntry" typecode="6751"/>
+			<attributes>
+				<attribute qualifier="region" type="java.lang.String">
+					<modifiers optional="false" write="false" initial="true"/>
+					<persistence type="property"/>
+				</attribute>
+				<attribute qualifier="key" type="java.lang.String">
+					<modifiers optional="false" write="false" initial="true"/>
+					<persistence type="property"/>
+				</attribute>
+				<attribute qualifier="value" type="java.lang.String">
+					<modifiers optional="false" />
+					<persistence type="property"/>
+				</attribute>
+			</attributes>
+			<indexes>
+				<index name="UniqueRegionKey" unique="true">
+					<key attribute="region"/>
+					<key attribute="key"/>
+				</index>
+			</indexes>
+		</itemtype>
+
+		<typegroup name="monitoring">
+
+			<itemtype code="MonitorHistoryData" extends="GenericItem" jaloclass="de.hybris.platform.cloud.commons.jalo.MonitorHistoryData">
+				<deployment table="MonitorHist" typecode="6752"/>
+				<attributes>
+					<attribute qualifier="key" type="java.lang.String">
+						<modifiers optional="false" initial="true"/>
+						<persistence type="property"/>
+					</attribute>
+					<attribute qualifier="systemArea" type="MonitorSystemArea">
+						<modifiers optional="false" initial="true" />
+						<persistence type="property"/>
+					</attribute>
+					<attribute qualifier="status" type="MonitorStatus">
+						<modifiers optional="false" />
+						<persistence type="property"/>
+					</attribute>
+					<attribute qualifier="exceptionMessage" type="java.lang.String">
+						<persistence type="property">
+							<columntype database="oracle">
+								<value>CLOB</value>
+							</columntype>
+							<columntype>
+								<value>HYBRIS.LONG_STRING</value>
+							</columntype>
+						</persistence>
+					</attribute>
+				</attributes>
+				<indexes>
+					<index name="UniqueKeyArea" unique="true">
+						<key attribute="systemArea"/>
+						<key attribute="key"/>
+					</index>
+				</indexes>
+			</itemtype>
+
+			<itemtype code="MonitorHistoryEntryData" extends="GenericItem" jaloclass="de.hybris.platform.cloud.commons.jalo.MonitorHistoryEntryData">
+				<deployment table="MonitorHistEntry" typecode="6753"/>
+				<attributes>
+					<attribute qualifier="step" type="MonitorStep">
+						<modifiers optional="false" initial="true"/>
+						<persistence type="property"/>
+					</attribute>
+					<attribute qualifier="status" type="MonitorStatus">
+						<modifiers optional="false" initial="true" />
+						<persistence type="property"/>
+					</attribute>
+					<attribute qualifier="started" type="java.util.Date">
+						<persistence type="property"/>
+					</attribute>
+					<attribute qualifier="ended" type="java.util.Date">
+						<persistence type="property"/>
+					</attribute>
+					<attribute qualifier="duration" type="java.lang.Long">
+						<persistence type="property"/>
+					</attribute>
+					<attribute qualifier="nodeId" type="int">
+						<persistence type="property"/>
+					</attribute>
+					<attribute qualifier="message" type="java.lang.String">
+						<persistence type="property">
+							<columntype database="oracle">
+								<value>CLOB</value>
+							</columntype>
+							<columntype>
+								<value>HYBRIS.LONG_STRING</value>
+							</columntype>
+						</persistence>
+					</attribute>
+				</attributes>
+			</itemtype>
+
+			<itemtype code="MonitorHistoryEntryActionData" extends="GenericItem" jaloclass="de.hybris.platform.cloud.commons.jalo.MonitorHistoryEntryActionData">
+				<deployment table="MonitorHistEntryAction" typecode="6754"/>
+				<attributes>
+					<attribute qualifier="code" type="java.lang.String">
+						<modifiers optional="false" initial="true"/>
+						<persistence type="property"/>
+					</attribute>
+					<attribute qualifier="status" type="MonitorStatus">
+						<modifiers optional="false" initial="true" />
+						<persistence type="property"/>
+					</attribute>
+					<attribute qualifier="started" type="java.util.Date">
+						<persistence type="property"/>
+					</attribute>
+					<attribute qualifier="ended" type="java.util.Date">
+						<persistence type="property"/>
+					</attribute>
+					<attribute qualifier="duration" type="java.lang.Long">
+						<persistence type="property"/>
+					</attribute>
+					<attribute qualifier="message" type="java.lang.String">
+						<persistence type="property">
+							<columntype database="oracle">
+								<value>CLOB</value>
+							</columntype>
+							<columntype>
+								<value>HYBRIS.LONG_STRING</value>
+							</columntype>
+						</persistence>
+					</attribute>
+				</attributes>
+			</itemtype>
+		</typegroup>
+
+	</itemtypes>
+</items>

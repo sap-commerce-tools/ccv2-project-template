@@ -1,0 +1,97 @@
+/*
+* ----------------------------------------------------------------
+* --- WARNING: THIS FILE IS GENERATED AND WILL BE OVERWRITTEN!
+* --- Generated at $currentDateTime
+* ----------------------------------------------------------------
+*/
+package $packageName;
+
+#foreach($i in $imports)
+import $i;
+#end
+#if ( ! $imports.isEmpty() )
+
+#end
+#if ( $hasDescription || $hasDeprecated )
+/**
+#end
+#if ( $hasDescription)
+* $description
+#end
+#if ( $hasDescription && $hasDeprecated )
+*
+#end
+#if ( $hasDeprecated )
+* @deprecated $deprecated
+#end
+#if ( $hasDescription || $hasDeprecated )
+*/
+#end
+#if ( $hasDeprecated )
+@Deprecated
+#end
+public class $shortClassName #if($superclassName)extends $superclassName #else implements java.io.Serializable #end
+
+{
+#foreach($v in $memberVariables)
+	$v.comment
+	private $v.type $v.name;
+#end
+
+	private ${constructorName}(final Builder builder)
+	{
+#foreach($v in $memberVariables)
+		this.$v.name = builder.$v.name;
+#end
+	}
+
+#foreach($v in $memberVariables)
+#if ($v.overridden)	@Override #end
+#if ($v.type == 'boolean')
+	public $v.type is${StringUtils.capitalize($v.name)}()
+	{
+	return $v.name;
+	}
+#else
+	public $v.type get${StringUtils.capitalize($v.name)}()
+	{
+		return $v.name;
+	}
+#end
+#if (${StringUtils.startsWith($v.type, 'List')})
+
+	public void addTo${StringUtils.capitalize($v.name)}(final ${StringUtils.substringBefore(${StringUtils.substringAfter($v.type, "<")}, ">")} value)
+	{
+		${v.name}.add(value);
+	}
+#end
+
+#end
+	public static Builder builder() {
+		return new Builder();
+	}
+
+	public static class Builder {
+
+#foreach($v in $memberVariables)
+		private $v.type $v.name;
+#end
+
+		private Builder()
+		{
+		// deliberately empty
+		}
+
+#foreach($v in $memberVariables)
+		public Builder with${StringUtils.capitalize($v.name)}(final ${v.type} ${v.name})
+		{
+			this.${v.name} = ${v.name};
+			return this;
+		}
+
+#end
+		public $shortClassName build() {
+			return new $shortClassName(this);
+		}
+	}
+}

@@ -1,0 +1,234 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+ [y] hybris Platform
+
+ Copyright (c) 2017 SAP SE or an SAP affiliate company.  All rights reserved.
+
+ This software is the confidential and proprietary information of SAP
+ ("Confidential Information"). You shall not disclose such Confidential
+ Information and shall use it only in accordance with the terms of the
+ license agreement you entered into with SAP.
+-->
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:int="http://www.springframework.org/schema/integration"
+       xmlns:util="http://www.springframework.org/schema/util"
+       xmlns:p="http://www.springframework.org/schema/p"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+           http://www.springframework.org/schema/integration http://www.springframework.org/schema/integration/spring-integration.xsd
+           http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util.xsd">
+
+    <bean id="unzipDirectoryHeaderKey" class="java.lang.String">
+        <constructor-arg
+                value="#{T(de.hybris.platform.cloud.hotfolder.spring.integration.zip.CloudZipHeaders).UNZIP_DIRECTORY}"/>
+    </bean>
+
+    <bean id="zipProcessingDir" class="java.io.File">
+        <constructor-arg value="#{baseDirectory}/${tenantId}/unzipped"/>
+    </bean>
+
+    <!-- 1) Map zip files to channel based on name pattern -->
+    <bean class="org.springframework.beans.factory.config.MethodInvokingFactoryBean">
+        <property name="targetObject" ref="hotfolderInboundFileChannelMappings"/>
+        <property name="targetMethod" value="put"/>
+        <property name="arguments">
+            <list>
+                <bean class="java.util.regex.Pattern" factory-method="compile">
+                    <constructor-arg value="^(?:.*)\.(?i)(zip)$"/>
+                </bean>
+                <ref bean="cloudHotFolderUnzipChannel"/>
+            </list>
+        </property>
+    </bean>
+
+    <int:channel id="cloudHotFolderUnzipChannel"/>
+
+    <!-- 2) extract the zip -->
+    <int:transformer input-channel="cloudHotFolderUnzipChannel"
+                     output-channel="setupUnzippedFilesHeader"
+                     ref="unZipTransformer"/>
+
+    <bean id="unZipTransformer"
+          class="de.hybris.platform.cloud.hotfolder.spring.integration.zip.CloudUnZipTransformer">
+        <property name="zipResultType" value="FILE"/>
+        <property name="deleteFiles" value="false"/>
+        <property name="expectSingleResult" value="false"/>
+        <property name="workDirectory" ref="zipProcessingDir"/>
+    </bean>
+
+    <!-- 3) prepare the header for the contents of the extracted zip -->
+    <int:service-activator input-channel="setupUnzippedFilesHeader"
+                           output-channel="initUnzippedFilesHeader"
+                           ref="zipHeaderSetupTask"
+                           method="execute"/>
+
+    <bean id="zipHeaderSetupTask"
+          class="de.hybris.platform.cloud.hotfolder.dataimport.batch.zip.task.ZipHeaderSetupTask">
+        <property name="fileNameHeaderKey" ref="fileNameHeaderKey"/>
+        <property name="unZipDirectoryHeaderKey" ref="unzipDirectoryHeaderKey"/>
+        <property name="catalog" value="${cloud.hotfolder.default.zip.header.catalog}"/>
+        <property name="net" value="${cloud.hotfolder.default.zip.header.net}"/>
+    </bean>
+
+    <!-- 4) init default values required -->
+    <int:service-activator input-channel="initUnzippedFilesHeader"
+                           output-channel="convertUnzippedCsvFilesHeader"
+                           ref="zipHeaderInitTask"
+                           method="executeZip"/>
+
+    <bean id="zipHeaderInitTask" class="de.hybris.platform.cloud.hotfolder.dataimport.batch.zip.task.ZipHeaderInitTask"
+          parent="headerInitTask">
+        <property name="sequenceIdParser" ref="zipBatchSequenceIdParser"/>
+        <property name="languageParser" ref="zipBatchLanguageParser"/>
+        <property name="fallbackLanguage" value="en"/>
+    </bean>
+
+    <bean id="zipBatchSequenceIdParser" class="de.hybris.platform.acceleratorservices.dataimport.batch.util.SequenceIdParser">
+        <property name="parser">
+            <bean class="de.hybris.platform.acceleratorservices.util.RegexParser">
+                <property name="regex" value="-(\d+)\.zip"/>
+            </bean>
+        </property>
+    </bean>
+    <bean id="zipBatchLanguageParser" class="de.hybris.platform.acceleratorservices.util.RegexParser">
+        <property name="regex" value="-(\w{2})-(\d+)\.zip"/>
+    </bean>
+
+    <!-- 5) convert any CSVs contained in the extracted zip -->
+    <int:service-activator input-channel="convertUnzippedCsvFilesHeader"
+                           output-channel="executeUnzippedFilesHeader"
+                           ref="zipHeaderTransformerTask"
+                           method="executeZip"/>
+
+    <bean id="zipHeaderTransformerTask"
+          class="de.hybris.platform.cloud.hotfolder.dataimport.batch.zip.task.ZipHeaderTransformerTask"
+          parent="batchTransformerTask"/>
+
+    <bean id="cloudHotFolderZipMediaConverterMapping"
+          class="de.hybris.platform.acceleratorservices.dataimport.batch.converter.mapping.impl.DefaultConverterMapping"
+          p:mapping="zip_media"
+          p:converter-ref="batchMediaConverter"/>
+
+    <bean id="cloudHotFolderZipMediaContainerConverterMapping"
+          class="de.hybris.platform.acceleratorservices.dataimport.batch.converter.mapping.impl.DefaultConverterMapping"
+          p:mapping="zip_media"
+          p:converter-ref="batchMediaContainerConverter"/>
+
+    <bean id="cloudHotFolderZipMediaProductConverterMapping"
+          class="de.hybris.platform.acceleratorservices.dataimport.batch.converter.mapping.impl.DefaultConverterMapping"
+          p:mapping="zip_media"
+          p:converter-ref="batchMediaProductConverter"/>
+
+
+    <!-- 6) import the contents of the extracted zip -->
+    <int:service-activator input-channel="executeUnzippedFilesHeader"
+                           output-channel="cleanUpUnzippedFilesHeader"
+                           ref="zipHeaderExecutionTask"
+                           method="executeZip"/>
+
+    <bean id="zipHeaderExecutionTask" class="de.hybris.platform.cloud.hotfolder.dataimport.batch.zip.task.ZipHeaderExecutionTask">
+        <property name="unzippedFolderImportServices" ref="unzippedFolderImportServices"/>
+    </bean>
+
+    <bean id="commaSeparatedConfigSplitter" class="com.google.common.base.Splitter" factory-method="on"
+          init-method="omitEmptyStrings">
+        <constructor-arg value="," type="java.lang.String"/>
+    </bean>
+
+    <alias name="defaultCloudHotFolderZipImportDatas" alias="cloudHotFolderZipImportDatas"/>
+    <util:list id="defaultCloudHotFolderZipImportDatas">
+        <bean class="de.hybris.platform.commerceservices.setup.data.ImportData">
+            <property name="productCatalogName" value="${cloud.hotfolder.default.zip.mapping.product.catalog}"/>
+            <property name="contentCatalogNames">
+                <bean factory-bean="commaSeparatedConfigSplitter" factory-method="splitToList">
+                    <constructor-arg value="${cloud.hotfolder.default.zip.mapping.content.catalogs}"/>
+                </bean>
+            </property>
+            <property name="storeNames">
+                <bean factory-bean="commaSeparatedConfigSplitter" factory-method="splitToList">
+                    <constructor-arg value="${cloud.hotfolder.default.zip.mapping.store.names}"/>
+                </bean>
+            </property>
+        </bean>
+    </util:list>
+
+    <alias name="defaultCloudHotFolderImportSystemSetup" alias="cloudHotFolderImportSystemSetup"/>
+    <bean id="defaultCloudHotFolderImportSystemSetup"
+          class="de.hybris.platform.cloud.hotfolder.dataimport.batch.zip.service.impl.ImportZipSystemSetup"
+          parent="abstractCoreSystemSetup">
+        <property name="setupParameterKeys">
+            <list>
+                <util:constant
+                        static-field="de.hybris.platform.commerceservices.dataimport.AbstractDataImportService.ACTIVATE_SOLR_CRON_JOBS"/>
+                <util:constant
+                        static-field="de.hybris.platform.commerceservices.dataimport.AbstractDataImportService.IMPORT_MOBILE_DATA"/>
+                <util:constant
+                        static-field="de.hybris.platform.commerceservices.dataimport.impl.CoreDataImportService.IMPORT_CORE_DATA"/>
+                <util:constant
+                        static-field="de.hybris.platform.commerceservices.dataimport.impl.SampleDataImportService.IMPORT_SAMPLE_DATA"/>
+            </list>
+        </property>
+    </bean>
+
+    <bean id="abstractDataImportUnzippedFolderImportService"
+          class="de.hybris.platform.cloud.hotfolder.dataimport.batch.zip.service.impl.DataImportUnzippedFolderImportService"
+          abstract="true">
+        <property name="abstractSystemSetup" ref="cloudHotFolderImportSystemSetup"/>
+        <property name="importDatas" ref="cloudHotFolderZipImportDatas"/>
+    </bean>
+
+    <bean id="coreDataImportUnzippedFolderImportService" parent="abstractDataImportUnzippedFolderImportService">
+        <property name="abstractDataImportService">
+            <bean parent="coreDataImportService">
+                <property name="setupImpexService" ref="fileBasedSetupImpexService"/>
+            </bean>
+        </property>
+        <property name="requiredSubdirectory" value="import/coredata"/>
+    </bean>
+
+    <bean id="sampleDataImportUnzippedFolderImportService" parent="abstractDataImportUnzippedFolderImportService">
+        <property name="abstractDataImportService">
+            <bean parent="sampleDataImportService">
+                <property name="setupImpexService" ref="fileBasedSetupImpexService"/>
+            </bean>
+        </property>
+        <property name="requiredSubdirectory" value="import/sampledata"/>
+    </bean>
+
+    <bean id="rawImpexUnzippedFolderImportService"
+          class="de.hybris.platform.cloud.hotfolder.dataimport.batch.zip.service.impl.RawImpexUnzippedFolderImportService">
+        <property name="setupImpexService" ref="fileBasedSetupImpexService"/>
+    </bean>
+
+    <alias name="defaultUnzippedFolderImportServices" alias="unzippedFolderImportServices"/>
+    <util:map id="defaultUnzippedFolderImportServices">
+        <entry value-ref="coreDataImportUnzippedFolderImportService">
+            <key>
+                <bean class="java.util.regex.Pattern" factory-method="compile">
+                    <constructor-arg value="^coredata.*"/>
+                </bean>
+            </key>
+        </entry>
+        <entry value-ref="sampleDataImportUnzippedFolderImportService">
+            <key>
+                <bean class="java.util.regex.Pattern" factory-method="compile">
+                    <constructor-arg value="^sampledata.*"/>
+                </bean>
+            </key>
+        </entry>
+        <entry value-ref="rawImpexUnzippedFolderImportService">
+            <key>
+                <bean class="java.util.regex.Pattern" factory-method="compile">
+                    <constructor-arg value="(?!coredata|sampledata).*"/>
+                </bean>
+            </key>
+        </entry>
+    </util:map>
+
+    <!-- 7) Cleanup -->
+    <int:service-activator input-channel="cleanUpUnzippedFilesHeader" ref="zipHeaderCleanUpTask" method="executeZip"/>
+    <bean id="zipHeaderCleanUpTask" class="de.hybris.platform.cloud.hotfolder.dataimport.batch.zip.task.ZipHeaderCleanUpTask">
+        <property name="cleanupHelper" ref="cleanupHelper"/>
+    </bean>
+
+</beans>

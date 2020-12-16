@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<hybrisconfig xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="resources/schemas/extensions.xsd">
+  <extensions>
+    <path dir="${HYBRIS_BIN_DIR}"/>
+
+    <extension name="envribbon"/>
+    <extension name="hacvcsinfo"/>
+    <extension name="sanecleanup"/>
+    
+    <extension name="@projectName@backoffice"/>
+    <extension name="@projectName@initialdata"/>
+    <extension name="@projectName@storefront"/>
+    <extension name="@projectName@fulfilmentprocess"/>
+    <extension name="@projectName@occ" />
+    <extension name="@projectName@occtests" />
+
+    <!-- https://launchpad.support.sap.com/#/notes/2817992 -->
+    <extension name="azurecloudhotfolder"/>
+    
+    <extension name="solrserver" />
+    <extension name="commercewebservices" />
+
+    <extension name="backoffice" />
+
+    <!-- Integration API -->
+    <!-- https://help.sap.com/viewer/50c996852b32456c96d3161a95544cdb/LATEST/en-US/9af51e8010034ac7bda41a3486196894.html -->
+    <extension name="odata2webservices" />
+    <extension name="integrationbackoffice" />
+    <extension name="inboundservices" />
+    <extension name="outboundservices" />
+    <extension name="outboundsync" />
+    <extension name="integrationmonitoringbackoffice" />
+    <extension name="outboundsyncbackoffice" />
+
+    <!-- minimal SmartEdit -->
+    <!-- https://help.sap.com/viewer/4745aa9f2ec0431faca4b47723d0b149/LATEST/en-US/7d3f83250d9846518f4154cfb18ae051.html -->
+    <extension name="smartedit" />
+    <extension name="smarteditaddon" />
+    <extension name="cmssmartedit" />
+    <extension name="cmssmarteditwebservices" />
+    <extension name="smarteditwebservices" />
+    <extension name="cmswebservices" />
+    <extension name="permissionswebservices" />
+    <extension name="previewwebservices" />
+
+  </extensions>
+</hybrisconfig>

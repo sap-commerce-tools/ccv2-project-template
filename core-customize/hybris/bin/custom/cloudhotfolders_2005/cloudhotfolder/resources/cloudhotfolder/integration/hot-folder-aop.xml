@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+ [y] hybris Platform
+
+ Copyright (c) 2017 SAP SE or an SAP affiliate company.  All rights reserved.
+
+ This software is the confidential and proprietary information of SAP
+ ("Confidential Information"). You shall not disclose such Confidential
+ Information and shall use it only in accordance with the terms of the
+ license agreement you entered into with SAP.
+-->
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:aop="http://www.springframework.org/schema/aop"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+                           http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop.xsd">
+
+    <aop:config>
+        <aop:aspect ref="fileUnzippedAspectBean">
+            <aop:around method="aroundUnzipped"
+                        pointcut="bean(unZipTransformer) and execution(* doTransform(..)) and args(message)" />
+        </aop:aspect>
+        <aop:aspect ref="batchHeaderAspectBean" id="zipBatchHeaderAspect">
+            <aop:around method="aroundMessageSetup"
+                        pointcut="execution(* de.hybris.platform.cloud.hotfolder.dataimport.batch.zip.task.ZipHeaderSetupTask.execute(..)) and args(message)"/>
+            <aop:around method="aroundInit"
+                        pointcut="execution(* de.hybris.platform.cloud.hotfolder.dataimport.batch.zip.task.ZipHeaderInitTask.executeZip(..)) and args(header)"/>
+            <aop:around method="aroundTransform"
+                        pointcut="execution(* de.hybris.platform.cloud.hotfolder.dataimport.batch.zip.task.ZipHeaderTransformerTask.executeZip(..)) and args(header)"/>
+            <aop:around method="aroundExecute"
+                        pointcut="execution(* de.hybris.platform.cloud.hotfolder.dataimport.batch.zip.task.ZipHeaderExecutionTask.executeZip(..)) and args(header)"/>
+            <aop:around method="aroundCleanup"
+                        pointcut="execution(* de.hybris.platform.cloud.hotfolder.dataimport.batch.zip.task.ZipHeaderCleanUpTask.executeZip(..)) and args(header)"/>
+        </aop:aspect>
+        <aop:aspect ref="batchHeaderAspectBean" id="fileBatchHeaderAspect">
+            <aop:around method="aroundFileSetup"
+                        pointcut="execution(* de.hybris.platform.acceleratorservices.dataimport.batch.task.HeaderSetupTask.execute(..)) and args(file)"/>
+            <aop:around method="aroundInit"
+                        pointcut="execution(* de.hybris.platform.acceleratorservices.dataimport.batch.task.HeaderInitTask.execute(..)) and args(header)"/>
+            <aop:around method="aroundTransform"
+                        pointcut="execution(* de.hybris.platform.acceleratorservices.dataimport.batch.task.ImpexTransformerTask.execute(..)) and args(header)"/>
+            <aop:around method="aroundExecute"
+                        pointcut="execution(* de.hybris.platform.acceleratorservices.dataimport.batch.task.AbstractImpexRunnerTask.execute(..)) and args(header)"/>
+            <aop:around method="aroundCleanup"
+                        pointcut="execution(* de.hybris.platform.acceleratorservices.dataimport.batch.task.CleanupTask.execute(..)) and args(header)"/>
+        </aop:aspect>
+        <aop:aspect ref="impexImportAspectBean" id="impexImportAspect">
+            <aop:around method="aroundSetupImpex" pointcut="bean(fileBasedSetupImpexService) and execution(* importImpexFile(..)) and args(file, errorIfMissing, ..)" />
+            <aop:around method="aroundImportData" pointcut="bean(aopMonitoringImportService) and execution(* importData(..)) and args(config)" />
+        </aop:aspect>
+    </aop:config>
+
+    <bean id="abstractMonitoringAspect" class="de.hybris.platform.cloud.hotfolder.aop.AbstractMonitoringAspect" abstract="true">
+        <property name="monitorService" ref="monitorService"/>
+    </bean>
+
+    <bean id="fileUnzippedAspectBean" class="de.hybris.platform.cloud.hotfolder.aop.FileUnzippedAspect" parent="abstractMonitoringAspect">
+        <property name="fileNameHeaderKey" ref="fileNameHeaderKey"/>
+        <property name="fileLastModifiedHeaderKey" ref="fileLastModifiedHeaderKey"/>
+    </bean>
+    <bean id="batchHeaderAspectBean" class="de.hybris.platform.cloud.hotfolder.aop.BatchHeaderAspect" parent="abstractMonitoringAspect">
+        <property name="fileNameHeaderKey" ref="fileNameHeaderKey"/>
+    </bean>
+
+    <bean id="impexImportAspectBean" class="de.hybris.platform.cloud.hotfolder.aop.ImpexImportAspect" parent="abstractMonitoringAspect"/>
+
+</beans>
