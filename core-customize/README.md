@@ -41,7 +41,7 @@ We use Gradle + [commerce-gradle-plugin][plugin] to automate whole project setup
 ```sh
 git clone <project>
 cd <project>
-docker-compose up
+docker-compose up -d
 cd core-customize
 ./gradlew setupLocalDevelopment
 ./gradlew yclean yall
