@@ -7,4 +7,4 @@ Mock extension based on [Preparing a Mock Extension to Deploy Locally][mock]
 To enable it for local development, rename the file `extensioninfo.disabled` 
 to `extensioninfo.xml`.
 
-**Never commit `extensioninfo.xml`, otherwise you will break your build in CCv2!**
+**Never commit `extensioninfo.xml`, otherwise you will break your project in CCv2!**
