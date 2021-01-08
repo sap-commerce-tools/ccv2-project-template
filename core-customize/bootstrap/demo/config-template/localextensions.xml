@@ -4,8 +4,9 @@
     <path dir="${HYBRIS_BIN_DIR}"/>
 
     <extension name="envribbon"/>
-    <!-- https://github.com/SAP/spartacus/releases/tag/storefront-2.1.4 -->
-    <extension name="spartacussampledataaddon"/>
+    <!-- https://sap.github.io/spartacus-docs/installing-sap-commerce-cloud-2011/ -->
+    <!-- https://github.com/SAP/spartacus/releases/tag/storefront-3.0.0 -->
+    <extension name="spartacussampledata"/>
 
     <extension name="demoshopbackoffice"/>
     <extension name="demoshopinitialdata"/>

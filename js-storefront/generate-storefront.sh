@@ -1,6 +1,6 @@
 #!/usr/bin/env sh
 
-# yarn global add @angular/cli@v9-lts
+# yarn global add @angular/cli@v10-lts
 ng new demoshop --style=scss --routing=false --packageManager=yarn
 (
     cd demoshop || exit 1

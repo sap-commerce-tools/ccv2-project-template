@@ -5,7 +5,7 @@ import '@angular/localize/init';
 import 'zone.js/dist/zone-node';
 
 import { ngExpressEngine as engine } from '@nguniversal/express-engine';
-import { NgExpressEngineDecorator } from '@spartacus/core';
+import { NgExpressEngineDecorator } from '@spartacus/setup/ssr';
 import * as express from 'express';
 import { join } from 'path';
 
@@ -18,7 +18,7 @@ const ngExpressEngine = NgExpressEngineDecorator.get(engine);
 // The Express app is exported so that it can be used by serverless Functions.
 export function app() {
   const server = express();
-  const distFolder = join(process.cwd(), 'dist/demoshop');
+  const distFolder = join(process.cwd(), 'dist/demoshop/browser');
   const indexHtml = existsSync(join(distFolder, 'index.original.html'))
     ? 'index.original.html'
     : 'index';

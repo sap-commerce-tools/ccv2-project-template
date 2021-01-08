@@ -140,11 +140,11 @@ manifest.json           |         │  │  │  ├── 10-local.properties +
 ## Demo Setup
 
 The file `bootstrap-demo.gradle.kts` bootstraps a demo storefront based on the `cx` [recipe][recipe],
-including the `spartacussampledataaddon` (necessary to demo the Spartacus storefront; [documentation][spartacussample])
+including the `spartacussampledata` extension (necessary to demo the Spartacus storefront; [documentation][spartacussample])
 
 To generate the demo, run:
 ```
 ./gradlew bootstrap-demo.gradle.kts
 ```
-[spartacussample]: https://sap.github.io/spartacus-docs/spartacussampledataaddon/
+[spartacussample]: https://sap.github.io/spartacus-docs/spartacussampledata-extension/
 [recipe]: https://help.sap.com/viewer/a74589c3a81a4a95bf51d87258c0ab15/2011/en-US/f09d46cf4a2546b586ed7021655e4715.html

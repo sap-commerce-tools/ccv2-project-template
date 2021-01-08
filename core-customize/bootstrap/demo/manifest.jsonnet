@@ -58,8 +58,7 @@ local storefrontAddons = [
   'timedaccesspromotionenginesamplesaddon',
   'xyformssamples',
   'xyformsstorefrontcommons',
-  'ysapproductconfigaddon',
-  'spartacussampledataaddon'
+  'ysapproductconfigaddon'
 ];
 
 local smartEditWebapps = [

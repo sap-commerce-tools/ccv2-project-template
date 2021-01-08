@@ -34,7 +34,7 @@ if (environment.occBaseUrl) {
         fallbackLang: 'en'
       },
       features: {
-        level: '2.1'
+        level: '3.0'
       }
     }),
     BrowserTransferStateModule,
