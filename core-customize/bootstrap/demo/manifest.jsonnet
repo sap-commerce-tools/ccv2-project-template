@@ -76,16 +76,12 @@ local smartEditWebapps = [
   // Smartedit personalization
   webapp('personalizationsmartedit'),
   webapp('personalizationwebservices'),
-  webapp('personalizationsearchsmartedit'),
-  webapp('personalizationpromotionssmartedit'),
   // Smartedit personalization promotion
   webapp('personalizationpromotionssmartedit'),
   // Smartedit personalization search
   webapp('personalizationsearchsmartedit'),
   // Smartedit promotion
-  webapp('merchandisingsmartedit'),
   webapp('merchandisingcmswebservices'),
-
   // https://help.sap.com/viewer/50c996852b32456c96d3161a95544cdb/1905/en-US/b21fa18f635d49eaa4d9ce5997a6a814.html
   webapp('merchandisingsmartedit'),
 ];
