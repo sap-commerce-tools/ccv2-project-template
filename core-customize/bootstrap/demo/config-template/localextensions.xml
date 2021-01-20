@@ -4,6 +4,8 @@
     <path dir="${HYBRIS_BIN_DIR}"/>
 
     <extension name="envribbon"/>
+    <extension name="hacvcsinfo"/>
+    <extension name="sanecleanup"/>
     <!-- https://sap.github.io/spartacus-docs/installing-sap-commerce-cloud-2011/ -->
     <!-- https://github.com/SAP/spartacus/releases/tag/storefront-3.0.0 -->
     <extension name="spartacussampledata"/>
