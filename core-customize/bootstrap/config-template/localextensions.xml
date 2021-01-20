@@ -20,7 +20,10 @@
     <extension name="solrserver" />
     <extension name="commercewebservices" />
 
-    <extension name="backoffice" />
+    <extension name="cmsocc" />
+    <extension name="cmsbackoffice" />
+
+    <extension name="acceleratorocc" />
 
     <!-- Integration API -->
     <!-- https://help.sap.com/viewer/50c996852b32456c96d3161a95544cdb/LATEST/en-US/9af51e8010034ac7bda41a3486196894.html -->
