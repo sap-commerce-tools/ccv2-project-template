@@ -1,6 +1,3 @@
-> **Archived on 2020-02-16**\
-> I recently switched jobs away from SAP Commerce development
-
 # Version Control Infos for Administration Console
 [![ko-fi](https://www.ko-fi.com/img/githubbutton_sm.svg)](https://ko-fi.com/W7W7VS24)
 

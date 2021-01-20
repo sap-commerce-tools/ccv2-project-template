@@ -1,15 +1,5 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
-<!--
- [y] hybris Platform
-
- Copyright (c) 2018 SAP SE or an SAP affiliate company. All rights reserved.
-
- This software is the confidential and proprietary information of SAP
- ("Confidential Information"). You shall not disclose such Confidential
- Information and shall use it only in accordance with the terms of the
- license agreement you entered into with SAP.
---><project>
-
+<project>
 	<macrodef name="hacvcsinfo_after_build">
 		<sequential>
 			<exec executable="git" dir="${ext.hacvcsinfo.path}" outputproperty="commit-hash" failifexecutionfails="false" failonerror="false" resultproperty="return.code"  >
@@ -27,12 +17,22 @@
 				<arg value="--short"/>
 				<arg value="HEAD"/>
 			</exec>
+			<exec executable="git" dir="${ext.hacvcsinfo.path}" outputproperty="commit-msg" failifexecutionfails="false" failonerror="false" resultproperty="return.code" >
+				<arg value="show"/>
+				<arg value="-s"/>
+				<arg value="--format=%s"/>
+				<arg value="HEAD"/>
+			</exec>
+			<echo message="hacvcsinfo hash: ${commit-hash}" />
+			<echo message="hacvcsinfo tag: ${commit-tag}" />
+			<echo message="hacvcsinfo branch: ${commit-branch}" />
+			<echo message="hacvcsinfo message: ${commit-msg}" />
 			<propertyfile file="${ext.hacvcsinfo.path}/resources/hacvcsinfo/vcs.properties">
 				<entry key="commit" value="${commit-hash}"/>
 				<entry key="tag" value="${commit-tag}"/>
 				<entry key="branch" value="${commit-branch}"/>
+				<entry key="message" value="${commit-msg}"/>
 			</propertyfile>
 		</sequential>
 	</macrodef>
-
 </project>
