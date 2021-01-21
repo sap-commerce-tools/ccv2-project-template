@@ -67,14 +67,19 @@ tasks.register<HybrisAntTask>("generateDemoOccTests") {
 }
 
 tasks.register<de.undercouch.gradle.tasks.download.Download>("downloadSpartacusSampleData") {
-    src("https://github.com/SAP/spartacus/releases/download/storefront-3.0.0/spartacussampledata.2005.zip")
+    src("https://github.com/SAP/spartacus/releases/download/storefront-3.0.1/spartacussampledata.2005.zip")
     dest("platform")
 }
 
 tasks.register<Copy>("unpackSpartacus") {
     dependsOn("downloadSpartacusSampleData")
     from(zipTree("platform/spartacussampledata.2005.zip"))
-    into("hybris/bin/custom/spartacussampledata")
+    into("hybris/bin/custom")
+    eachFile {
+        val newPath = relativePath.segments.drop(1).toMutableList()
+        newPath.add(0, "spartacussampledata")
+        relativePath = RelativePath(true, *newPath.toTypedArray())  
+    }
     includeEmptyDirs = false
 }
 
