@@ -15,4 +15,4 @@
 
 ## Spartacus Setup
 
-[js-storefront/demoshop/README.md](js-storefront/demoshop/README.md)
+[js-storefront/README.md](js-storefront/README.md)
