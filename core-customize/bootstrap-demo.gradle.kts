@@ -36,6 +36,15 @@ tasks.register<HybrisAntTask>("generateDemoStorefront") {
     antProperty("input.package", "com.demo.shop")
 }
 
+tasks.register("fixcmsflexcomponent") {
+    mustRunAfter("generateDemoStorefront")
+    doLast {
+        ant.withGroovyBuilder {
+            "touch"("file" to "hybris/bin/custom/demoshop/demoshopstorefront/web/webroot/WEB-INF/views/responsive/cms/cmsflexcomponent.jsp")
+        }
+    }
+}
+
 // ant extgen -Dinput.template=yacceleratorordermanagement -Dinput.name=demoshopordermanagement -Dinput.package=com.demo.shop.ordermanagement
 tasks.register<HybrisAntTask>("generateDemoOrderManagment") {
     dependsOn("bootstrapPlatform", "createDefaultConfig")
@@ -84,7 +93,7 @@ tasks.register<Copy>("unpackSpartacus") {
 }
 
 tasks.register("generateCode") {
-    dependsOn("generateDemoStorefront", "generateDemoOrderManagment", "generateDemoOcc", "generateDemoOccTests", "unpackSpartacus")
+    dependsOn("generateDemoStorefront", "fixcmsflexcomponent", "generateDemoOrderManagment", "generateDemoOcc", "generateDemoOccTests", "unpackSpartacus")
         doLast {
         ant.withGroovyBuilder {
             "move"("file" to "hybris/bin/custom/demoshopordermanagement", "todir" to "hybris/bin/custom/demoshop")

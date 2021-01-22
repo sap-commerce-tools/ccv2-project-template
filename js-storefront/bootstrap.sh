@@ -66,13 +66,32 @@ ng new "$NAME" --style=scss --routing=false --packageManager=yarn
     fi
     progress "Applying optimizations"
     cp -r "../bootstrap/.vscode" .
-    for patch in ../bootstrap/*.patch; do
-        patch -p0 < "$patch"
-        success=$?
-        if [ $success -ne 0 ]; then
-            warning "could not apply patch $patch"
-        fi
+    for template in ../bootstrap/*.tmpl; do
+        output="$(printf "%s" "$template" | sed 's/\.[^.]*$//')"
+        sed "s/\$NAME/$NAME/g" "$template" > "$output"
     done
+    for patch in ../bootstrap/*.patch; do
+        patch -p0 < "$patch" || true
+    done
+    
+    progress "Setting up SAP Commerce Development Certificate"
+    COMMERCE_DEV_CERT_STORE="../../core-customize/hybris/bin/platform/resources/devcerts/ydevelopers.jks"
+    if [ -f "$COMMERCE_DEV_CERT_STORE" ]; then
+        if command -v 'keytool' > /dev/null 2>&1; then
+            keytool -exportcert \
+            -keystore ../../core-customize/hybris/bin/platform/resources/devcerts/ydevelopers.jks \
+            -storepass 123456 \
+            -alias mykey \
+            -rfc -file ydevelopers.pem
+        else
+            warn "JVM keytool not available"
+            warn "Cannot extract certificate to enable local SSR development"
+        fi
+    else
+        warn "SAP Commerce Developer Certificate store not found."
+        warn "($COMMERCE_DEV_CERT_STORE)"
+        warn "Cannot extract certificate to enable local SSR development"
+    fi
 )
 progress "Generating Manifest"
 if [ -f "manifest.json" ]; then
@@ -85,9 +104,6 @@ cat > manifest.json <<-EOF
     "applications": [{
         "name": "$NAME",
         "path": "$NAME",
-        "csr": {
-            "webroot": "dist/$NAME/browser/"
-        },
         "ssr": {
             "enabled": true,
             "path": "dist/$NAME/server/main.js"

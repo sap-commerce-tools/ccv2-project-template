@@ -20,15 +20,17 @@ You can delete the `bootstrap` folder and script afterwards.
 
 ## What does the script do?
 
-- Bootstraps a new Spartacus project from scratch as recommended by the official documentation
-- Generate a `manifest.json` for commerce cloud
+- Bootstraps a new Spartacus project from scratch as recommended by the official documentation (with PWA and SSR support)
 - Enable optimizations:
   - Configuration for "SAP Commerce in the Public Cloud" (aka CCv2) (including the [Smartedit setup][smartedit])
-  - [Recommended developer settings][developer] for [VS Code][code]
   - Streamlined OCC settings (check [`src/environments`](src/environments) and [`app.module.ts`](src/app/app.module.ts#L10-L17)) and [SAP/spartacus#5886][issue]
   - Minor tweaks to `package.json`:
     - Run production build on `yarn build` (see [Updating the Code Repository for JavaScript Storefronts][build])
     - Use SSL for local development server (`yarn start`)
+  - Enable SSR workaround for CCv2 ([SAP/spartacus#7993](https://github.com/SAP/spartacus/issues/7993))
+  - Setup SAP Commerce Cloud developer certificate for development SSR server
+  - [Recommended developer settings][developer] for [VS Code][code]
+- Generate a `manifest.json` for commerce cloud
 
 [spartacus]: https://github.com/SAP/cloud-commerce-spartacus-storefront
 [developer]: https://sap.github.io/cloud-commerce-spartacus-storefront-docs/recommended-development-environment/

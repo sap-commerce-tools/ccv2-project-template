@@ -1,0 +1,11 @@
+--- server.ts	2021-01-22 10:21:48.000000000 +0100
++++ server.ts	2021-01-22 09:32:03.000000000 +0100
+@@ -18,7 +18,7 @@
+ // The Express app is exported so that it can be used by serverless Functions.
+ export function app() {
+   const server = express();
+-  const distFolder = join(process.cwd(), 'dist/$NAME/browser');
++  const distFolder = join(process.cwd(), 'dist/$NAME');
+   const indexHtml = existsSync(join(distFolder, 'index.original.html'))
+     ? 'index.original.html'
+     : 'index';
