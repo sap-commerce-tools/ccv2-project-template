@@ -39,7 +39,7 @@ if ! command -v 'ng' > /dev/null 2>&1
 then
     error "Angular CLI (ng) not found"
     error "please install @angular/cli@v10-lts"
-    error "yarn global add @angular/cli@v10-lts"
+    error "> yarn global add @angular/cli@v10-lts"
     exit 1
 fi
 
@@ -66,32 +66,17 @@ ng new "$NAME" --style=scss --routing=false --packageManager=yarn
     fi
     progress "Applying optimizations"
     cp -r "../bootstrap/.vscode" .
+    angular="$(grep -i '@angular/animations' package.json | awk '{ print $2 }')"
     for template in ../bootstrap/*.tmpl; do
         output="$(printf "%s" "$template" | sed 's/\.[^.]*$//')"
-        sed "s/\$NAME/$NAME/g" "$template" > "$output"
+        sed "s/\$NAME/$NAME/g" "$template" > "$output.1"
+        sed "s/\$ANGULAR/$angular/g" "$output.1" > "$output"
+        rm "$output.1"
     done
     for patch in ../bootstrap/*.patch; do
         patch -p0 < "$patch" || true
     done
-    
-    progress "Setting up SAP Commerce Development Certificate"
-    COMMERCE_DEV_CERT_STORE="../../core-customize/hybris/bin/platform/resources/devcerts/ydevelopers.jks"
-    if [ -f "$COMMERCE_DEV_CERT_STORE" ]; then
-        if command -v 'keytool' > /dev/null 2>&1; then
-            keytool -exportcert \
-            -keystore ../../core-customize/hybris/bin/platform/resources/devcerts/ydevelopers.jks \
-            -storepass 123456 \
-            -alias mykey \
-            -rfc -file ydevelopers.pem
-        else
-            warn "JVM keytool not available"
-            warn "Cannot extract certificate to enable local SSR development"
-        fi
-    else
-        warn "SAP Commerce Developer Certificate store not found."
-        warn "($COMMERCE_DEV_CERT_STORE)"
-        warn "Cannot extract certificate to enable local SSR development"
-    fi
+    yarn install
 )
 progress "Generating Manifest"
 if [ -f "manifest.json" ]; then

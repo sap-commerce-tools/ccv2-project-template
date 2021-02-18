@@ -1,6 +1,6 @@
---- package.json	2021-01-22 10:21:48.000000000 +0100
-+++ package.json	2021-01-22 09:35:40.000000000 +0100
-@@ -3,12 +3,12 @@
+--- package.json	2021-02-18 08:56:10.000000000 +0100
++++ package.json	2021-02-18 08:59:40.000000000 +0100
+@@ -3,18 +3,19 @@
    "version": "0.0.0",
    "scripts": {
      "ng": "ng",
@@ -12,7 +12,14 @@
      "lint": "ng lint",
      "e2e": "ng e2e",
 -    "dev:ssr": "ng run $NAME:serve-ssr",
-+    "dev:ssr": "NODE_EXTRA_CA_CERTS=./ydevelopers.pem ng run $NAME:serve-ssr",
++    "dev:ssr": "cross-env NODE_TLS_REJECT_UNAUTHORIZED=0 ng run $NAME:serve-ssr",
      "serve:ssr": "node dist/$NAME/server/main.js",
      "build:ssr": "ng build --prod && ng run $NAME:server:production",
      "prerender": "ng run $NAME:prerender"
+   },
+   "private": true,
+   "dependencies": {
++    "cross-env": "^7.0.3",
+     "@angular/animations": $ANGULAR
+     "@angular/common": $ANGULAR
+     "@angular/compiler": $ANGULAR
