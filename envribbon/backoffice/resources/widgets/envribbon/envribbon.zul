@@ -16,11 +16,17 @@
 
             if (meta.dataset.environment &amp;&amp; meta.dataset.type) {
                 var container = document.createElement("div");
+                var environment = meta.dataset.environment
 
                 container.id = 'mpern-env-ribbon';
                 container.classList.add("mpern-env-ribbon");
-                container.setAttribute("data-environment", meta.dataset.environment);
                 container.setAttribute("data-type", meta.dataset.type);
+
+                if (meta.dataset.aspect) {
+                    environment += "\n(" + meta.dataset.aspect + ")";
+                }
+
+                container.setAttribute("data-environment", environment);
 
                 document.body.insertBefore(container, document.body.firstChild);
             }

@@ -19,5 +19,6 @@ public class RibbonController extends DefaultWidgetController {
         EnvironmentMetaData environmentMetaData = environmentMetaDataService.getMetaData();
         envRibbon.setClientDataAttribute("environment", environmentMetaData.getCode());
         envRibbon.setClientDataAttribute("type", environmentMetaData.getType());
+        envRibbon.setClientDataAttribute("aspect", environmentMetaData.getAspect());
     }
 }

@@ -1,6 +1,3 @@
-> **Archived on 2020-02-16**\
-> I recently switched jobs away from SAP Commerce development
-
 # Environment Ribbons for SAP Commerce
 [![ko-fi](https://www.ko-fi.com/img/githubbutton_sm.svg)](https://ko-fi.com/W7W7VS24)
 
@@ -30,8 +27,10 @@ If you want to add a ribbon component to your storefront:
   (Build callbacks take care of copying the stylesheet where it is needed)
 - If deployed in a CCv2 environment, the extension will **auto-detect** the environment (code and type)
 - For on-prem environments (or if you want to override the detected values), you can use:
-  ```
+
+  ```properties
   ribbon.environment.code=<environment identifier>
+  ribbon.environment.aspect=<aspect name, optional>
   ribbon.environment.type=<type>
   # development, staging, production
   ```
