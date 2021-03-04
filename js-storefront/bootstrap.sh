@@ -50,7 +50,12 @@ if case $NG_VERSION in 10*) false;; *) true;; esac; then
 fi
 
 progress "Bootstrapping Angular project '$NAME'"
-ng new "$NAME" --style=scss --routing=false --packageManager=yarn
+ng new "$NAME" \
+  --skip-install \
+  --skip-git \
+  --style=scss \
+  --routing=false \
+  --packageManager=yarn
 (
     cd "$NAME" || exit 1
     progress "Adding Spartacus"
@@ -67,13 +72,15 @@ ng new "$NAME" --style=scss --routing=false --packageManager=yarn
     progress "Applying optimizations"
     cp -r "../bootstrap/.vscode" .
     angular="$(grep -i '@angular/animations' package.json | awk '{ print $2 }')"
-    for template in ../bootstrap/*.tmpl; do
-        output="$(printf "%s" "$template" | sed 's/\.[^.]*$//')"
+    mkdir "patches"
+    for template in ../bootstrap/patches/*.tmpl; do
+        output="$(basename "$template")"
+        output="patches/$(printf "%s" "$output" | sed 's/\.[^.]*$//')"
         sed "s/\$NAME/$NAME/g" "$template" > "$output.1"
         sed "s/\$ANGULAR/$angular/g" "$output.1" > "$output"
         rm "$output.1"
     done
-    for patch in ../bootstrap/*.patch; do
+    for patch in patches/*.patch; do
         patch -p0 < "$patch" || true
     done
     yarn install
