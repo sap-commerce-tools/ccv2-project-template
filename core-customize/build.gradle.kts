@@ -24,7 +24,7 @@ tasks.register("enableModeltMock") {
     }
     doLast {
          ant.withGroovyBuilder {
-            "move"("file" to "hybris/bin/custom/extras/modelt/extensioninfo.disabled", "tofile" to "hybris/bin/custom/extras/modelt/extensioninfo.xml")
+            "copy"("file" to "hybris/bin/custom/extras/modelt/extensioninfo.disabled", "tofile" to "hybris/bin/custom/extras/modelt/extensioninfo.xml")
         }
     }
 }
