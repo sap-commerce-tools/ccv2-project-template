@@ -2,10 +2,10 @@
     z-index: 10000;
 
     font-family: monospace;
-    font-size: 24px;
+    font-size: 1rem;
     line-height: 1em;
     text-transform: uppercase;
-    white-space: nowrap;
+    white-space: pre;
 
     overflow: hidden;
     position: absolute;
@@ -23,7 +23,7 @@
 .mpern-env-ribbon::before {
     content: attr(data-environment);
     display: block;
-    padding: 1em 2em;
+    padding: 0.5em 0;
     font-weight: 800;
     text-align: center;
 }

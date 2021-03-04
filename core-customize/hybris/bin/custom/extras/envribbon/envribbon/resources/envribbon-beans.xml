@@ -3,5 +3,6 @@
         <bean class="mpern.sap.commerce.ribbon.EnvironmentMetaData">
             <property name="code" type="String"/>
             <property name="type" type="String"/>
+            <property name="aspect" type="String" />
         </bean>
 </beans>

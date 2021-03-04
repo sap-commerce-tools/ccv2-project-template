@@ -13,6 +13,10 @@
                 container.dataset.environment = env.code;
                 container.dataset.type = env.type;
 
+                if (env.aspect) {
+                    container.dataset.environment += "\n(" + env.aspect + ")";
+                }
+
                 document.body.insertBefore(container, document.body.firstChild);
             }
         }

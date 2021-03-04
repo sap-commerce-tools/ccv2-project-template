@@ -17,8 +17,18 @@ public class DefaultEnvironmentMetaDataService implements EnvironmentMetaDataSer
 
         data.setCode(readEnvironmentFromConfig());
         data.setType(readTypeFromConfig());
+        data.setAspect(readAspectFromEnv());
 
         return data;
+    }
+
+    private String readAspectFromEnv() {
+        String aspect = configurationService.getConfiguration().getString("ribbon.environment.aspect", "");
+        if (aspect.isEmpty()) {
+            //env var is available in ccv2
+            aspect = System.getenv("ASPECT_NAME");
+        }
+        return aspect;
     }
 
     private String readEnvironmentFromConfig() {
