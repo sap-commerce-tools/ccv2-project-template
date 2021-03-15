@@ -1,6 +1,7 @@
 // find . -name 'extensioninfo.xml' | \
-// xargs xidel --silent --extract 'join((//extension/@name,//webmodule/@webroot))' | \
-// grep -v '^\(.\+\) /\1$' | grep '/'
+// xargs xml sel -t -v '//extension/@name' -o ": '"  -v '//webmodule/@webroot' -o "'," -n | \
+// grep -v "^\(.\+\): '/\1',$" | grep '/'
+
 local nonstandard_context_paths = {
   mediaweb: '/medias',
   testweb: '/test',
@@ -60,7 +61,7 @@ local smartEditWebapps = [
 ];
 
 // ------------ MANIFEST ------------
-{
+function(solrVersion=null, solrCustom='solr') {
   commerceSuiteVersion: '2011',
   useCloudExtensionPack: false,
   extensions: [
@@ -99,10 +100,12 @@ local smartEditWebapps = [
       location: 'hybris/config/localextensions.xml',
       exclude: [],
     },
+  } + if solrVersion != null then {
     solr: {
-      location: 'solr',
+      location: solrCustom,
     },
-  },
+  }
+  else {},
   properties: [],
   storefrontAddons: [
     { addon: addon, storefront: storefrontExtension, template: 'yacceleratorstorefront' }
@@ -147,4 +150,7 @@ local smartEditWebapps = [
       ],
     },
   ],
-}
+} + if solrVersion != null then {
+  // https://help.sap.com/viewer/1be46286b36a4aa48205be5a96240672/latest/en-US/b35bc14a62aa4950bdba451a5f40fc61.html#loiod7294323e5e542b7b37f48dd83565321
+  solrVersion: solrVersion,
+} else {}

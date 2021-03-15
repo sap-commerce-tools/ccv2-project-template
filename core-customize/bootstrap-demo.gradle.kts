@@ -18,7 +18,7 @@ import org.apache.tools.ant.taskdefs.condition.Os
 
 repositories {
     flatDir { dirs("platform") }
-    jcenter()
+    mavenCentral()
 }
 
 // ---------------------------------------------------
@@ -76,19 +76,14 @@ tasks.register<HybrisAntTask>("generateDemoOccTests") {
 }
 
 tasks.register<de.undercouch.gradle.tasks.download.Download>("downloadSpartacusSampleData") {
-    src("https://github.com/SAP/spartacus/releases/download/storefront-3.0.1/spartacussampledata.2005.zip")
+    src("https://github.com/SAP/spartacus/releases/download/storefront-3.1.0/spartacussampledata.2005.zip")
     dest("platform")
 }
 
 tasks.register<Copy>("unpackSpartacus") {
     dependsOn("downloadSpartacusSampleData")
     from(zipTree("platform/spartacussampledata.2005.zip"))
-    into("hybris/bin/custom")
-    eachFile {
-        val newPath = relativePath.segments.drop(1).toMutableList()
-        newPath.add(0, "spartacussampledata")
-        relativePath = RelativePath(true, *newPath.toTypedArray())  
-    }
+    into("hybris/bin/custom/spartacussampledata")
     includeEmptyDirs = false
 }
 
@@ -160,40 +155,15 @@ tasks.register("setupConfigFolder") {
     dependsOn("symlinkCommonProperties", "symlinkLocalDevProperties", "generateLocalProperties", "generateManifest")
 }
 
-//** bootstrap Solr configuration
-tasks.register<HybrisAntTask>("startSolr") {
-    dependsOn("mergeConfigFolder", "generateLocalProperties")
-    args("startSolrServers")
-}
-tasks.register<HybrisAntTask>("stopSolr") {
-    args("stopSolrServers")
-    mustRunAfter("startSolr")
-}
-tasks.register("startStopSolr") {
-    dependsOn("startSolr", "stopSolr")
-}
-tasks.register("moveSolrConfig") {
-    dependsOn("startStopSolr")
-    doLast {
-        ant.withGroovyBuilder {
-            "move"("file" to "hybris/config/solr/instances/cloud/configsets", "todir" to "solr/server/solr")
-        }
-    }
-}
-tasks.register<Exec>("setupSolrConfigForLocalDevelopment") {
-    dependsOn("moveSolrConfig")
-     if (Os.isFamily(Os.FAMILY_UNIX)) {
-        commandLine("sh", "-c", "ln -sfn ../../../../../solr/server/solr/configsets configsets")
-    } else {
-        // https://blogs.windows.com/windowsdeveloper/2016/12/02/symlinks-windows-10/
-        commandLine("cmd", "/c", """mklink /d "configsets" "..\\..\\..\\..\\..\\solr\\server\\solr\\configsets" """)
-    }
-    workingDir("hybris/config/solr/instances/cloud")
+tasks.register<GradleBuild>("setupLocalDev") {
+    mustRunAfter("generateCode", "setupConfigFolder")
+    buildFile = file("build.gradle.kts")
+    tasks = listOf("setupLocalDevelopment")
 }
 
 //** combine all of the above
 tasks.register("bootstrapDemo") {
-    dependsOn("generateCode", "setupConfigFolder", "setupSolrConfigForLocalDevelopment")
+    dependsOn("generateCode", "setupConfigFolder", "setupLocalDev")
 }
 
 defaultTasks("bootstrapDemo")

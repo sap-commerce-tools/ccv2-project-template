@@ -126,9 +126,6 @@ local smartEditWebapps = [
       location: 'hybris/config/localextensions.xml',
       exclude: [],
     },
-    solr: {
-      location: 'solr',
-    },
   },
   properties: [],
   storefrontAddons: [

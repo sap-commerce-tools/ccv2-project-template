@@ -7,14 +7,14 @@ import org.apache.tools.ant.taskdefs.condition.Os
 
 repositories {
     flatDir { dirs("platform") }
-    jcenter()
+    mavenCentral()
 }
 
 tasks.register<WriteProperties>("generateLocalProperties") {
     comment = "GENEREATED AT " + java.time.Instant.now()
     outputFile = project.file("hybris/config/local.properties")
 
-    property("hybris.optional.config.dir", project.file("hybris/config/local-config"))
+    property("hybris.optional.config.dir", "\${HYBRIS_CONFIG_DIR}/local-config")
 }
 
 // https://help.sap.com/viewer/b2f400d4c0414461a4bb7e115dccd779/LATEST/en-US/784f9480cf064d3b81af9cad5739fecc.html
