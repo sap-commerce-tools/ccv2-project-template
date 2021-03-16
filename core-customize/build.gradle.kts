@@ -6,7 +6,7 @@ import mpern.sap.commerce.build.tasks.HybrisAntTask
 import org.apache.tools.ant.taskdefs.condition.Os
 
 repositories {
-    flatDir { dirs("platform") }
+    flatDir { dirs("dependencies") }
     mavenCentral()
 }
 

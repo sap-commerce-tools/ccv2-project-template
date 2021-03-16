@@ -17,7 +17,7 @@ import mpern.sap.commerce.build.tasks.HybrisAntTask
 import org.apache.tools.ant.taskdefs.condition.Os
 
 repositories {
-    flatDir { dirs("platform") }
+    flatDir { dirs("dependencies") }
     mavenCentral()
 }
 
@@ -77,12 +77,12 @@ tasks.register<HybrisAntTask>("generateDemoOccTests") {
 
 tasks.register<de.undercouch.gradle.tasks.download.Download>("downloadSpartacusSampleData") {
     src("https://github.com/SAP/spartacus/releases/download/storefront-3.1.0/spartacussampledata.2005.zip")
-    dest("platform")
+    dest("dependencies")
 }
 
 tasks.register<Copy>("unpackSpartacus") {
     dependsOn("downloadSpartacusSampleData")
-    from(zipTree("platform/spartacussampledata.2005.zip"))
+    from(zipTree("dependencies/spartacussampledata.2005.zip"))
     into("hybris/bin/custom/spartacussampledata")
     includeEmptyDirs = false
 }

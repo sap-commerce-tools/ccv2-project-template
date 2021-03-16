@@ -65,7 +65,7 @@ wro_addons.xml
 *_bof.jar
 
 # project ignore
-/platform/
+/dependencies/
 /cloud-extension-pack/
 gradle.properties
 hybris/config/local.properties
