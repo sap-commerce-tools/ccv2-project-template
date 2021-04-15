@@ -61,9 +61,16 @@ local smartEditWebapps = [
 ];
 
 // ------------ MANIFEST ------------
-function(solrVersion=null, solrCustom='solr') {
-  commerceSuiteVersion: '2011',
+function(intExtPackVersion=null, solrVersion=null, solrCustom='solr') {
+  commerceSuiteVersion: '2011.4',
   useCloudExtensionPack: false,
+  extensionPacks: [
+  ] + if intExtPackVersion != null then [
+    {
+      name: 'hybris-commerce-integrations',
+      version: intExtPackVersion,
+    },
+  ] else [],
   extensions: [
     // modeltacceleratorservices is only available in CCv2 (not part of the cloud extension pack)
     // -> configure it in manifest.json
@@ -100,7 +107,7 @@ function(solrVersion=null, solrCustom='solr') {
       location: 'hybris/config/localextensions.xml',
       exclude: [],
     },
-  } + if solrVersion != null then {
+  } + if solrVersion != null && solrCustom != null then {
     solr: {
       location: solrCustom,
     },

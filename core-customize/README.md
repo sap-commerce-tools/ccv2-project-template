@@ -8,17 +8,20 @@
 >    ```bash
 >    cp ~/Downloads/CXCOMM201100P*.ZIP ./platform/hybris-commerce-suite-2011.0.zip
 >    ```
->
+>    *Or* configure your S-User (e.g. using `gradle.properties`) and run `./gradlew downloadAndVerifyPlatform`
 > 1. Bootstrap the starting point for your Commerce project by running the following command:
 >
 >    ```bash
 >    ./gradlew -b bootstrap.gradle.kts \
 >      -PprojectName=<name, e.g. coolshop> \
->      -ProotPackage=<package, e.g. com.cool.shop>
+>      -ProotPackage=<package, e.g. com.cool.shop> \
+>      -PintExtPackVersion=2102.0 # (optional) enable "SAP Commerce Cloud, Integration Extension Pack"
 >    ```
 >
->    (N.B.: If you use a headless setup: You can delete the generated `<something>storefront` extension
->     afterwards. Don't forget to remove it from `localextensions.xml` / `manifest.json`)
+>    Read the output!
+>
+>    (If you use a headless setup: You can delete the generated `<projectName>storefront` extension
+>     afterwards. Don't forget to remove it from `localextensions.xml` / `manifest.json` too)
 > 1. Review the generated configuration in `hybris/config`, especially the `hybris/config/environment/*.properties`
 >    files and `localextensions.xml` (search for `TODO:` comments)
 > 1. Update the `manifest.jsonnet` (again, search for `TODO:` comments).\

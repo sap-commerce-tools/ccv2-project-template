@@ -1,6 +1,6 @@
 plugins {
-    id("sap.commerce.build") version("3.0.0")
-    id("sap.commerce.build.ccv2") version("3.0.0")
+    id("sap.commerce.build") version("3.4.0")
+    id("sap.commerce.build.ccv2") version("3.4.0")
 }
 
 buildscript {
@@ -108,10 +108,23 @@ tasks.register("moveJsonnet") {
         }
     }
 }
-tasks.register("generateManifest") {
-    dependsOn("moveJsonnet")
+tasks.register("enableIntExtPack") {
+    mustRunAfter("moveJsonnet")
+    onlyIf {
+        project.hasProperty("intExtPackVersion")
+    }
     doLast {
-        sjsonnet.SjsonnetMain.main0(
+        ant.withGroovyBuilder {
+            "replace"(
+                "file" to "manifest.jsonnet", 
+                "token" to "intExtPackVersion=null", 
+                "value" to "intExtPackVersion='${project.property("intExtPackVersion")}'"
+            )
+        }
+    }
+}
+fun generateManifest() {
+    sjsonnet.SjsonnetMain.main0(
             arrayOf("--output-file", "manifest.json", "manifest.jsonnet"),
             sjsonnet.SjsonnetMain.createParseCache(),
             java.lang.System.`in`,
@@ -121,6 +134,11 @@ tasks.register("generateManifest") {
             scala.`None$`.empty(),
             scala.`None$`.empty()
         )
+}
+tasks.register("generateManifest") {
+    dependsOn("moveJsonnet", "enableIntExtPack")
+    doLast {
+        generateManifest()
     }
 }
 
@@ -157,7 +175,43 @@ tasks.register("setupConfigFolder") {
     dependsOn("symlinkCommonProperties", "symlinkLocalDevProperties", "generateLocalProperties", "generateManifest")
 }
 
-//** bootstrap Solr configuration
+tasks.register("enableSolrCustomization") {
+    dependsOn("symlinkSolrConfig", "manifestWithSolr")
+    group = "Bootstrap"
+    description = "Prepare Solr configuration for both local development and customization"
+}
+
+tasks.register<GradleBuild>("setupLocalDev") {
+    mustRunAfter("generateCode", "setupConfigFolder")
+    buildFile = file("build.gradle.kts")
+    tasks = listOf("setupLocalDevelopment")
+}
+
+//** combine all of the above
+tasks.register("bootstrapNewProject") {
+    dependsOn("generateCode", "setupConfigFolder", "setupLocalDev")
+    group = "Bootstrap"
+    description = "Bootstrap a new SAP Commerce project"
+    doLast {
+        println("")
+        println("==== Project generation finished! ====")
+        println("- Generated extensions:")
+        file("hybris/bin/custom/${inputName()}").listFiles().sortedBy{ it.name }.forEach {
+            println("\t${it.name}")
+        }
+        if (project.hasProperty("intExtPackVersion")) {
+            println("- Configured Integration Extension Pack ${project.property("intExtPackVersion")}")
+        }
+        println("- Generated new manifest.json (using manifest.jsonnet)")
+        println("")
+        println("(optional) To enable Solr customization, please execute:")
+        println("./gradlew -b bootstrap.gradle.kts enableSolrCustomization")
+    }
+}
+
+defaultTasks("bootstrapNewProject")
+
+//******* Optional: Bootstrap Solr customization *******
 tasks.register<HybrisAntTask>("startSolr") {
     args("startSolrServers")
 }
@@ -210,50 +264,14 @@ tasks.register("manifestWithSolr") {
         val solrVersion = tasks.named("findSolrVersion").get().extra.get("bundledSolrVersion") as String
         val majorMinor = solrVersion.split(".").take(2).joinToString(".")
         println("Detected Solr version ${solrVersion} bundled with the platform.")
-        println("Pinning Solr version to ${majorMinor} in manifest.json")
-        println("jsonnet --tla-str solrVersion=${majorMinor} --output-file manifest.json manifest.jsonnet")
-        sjsonnet.SjsonnetMain.main0(
-            arrayOf("--tla-str", "solrVersion=${majorMinor}", "--output-file", "manifest.json", "manifest.jsonnet"),
-            sjsonnet.SjsonnetMain.createParseCache(),
-            java.lang.System.`in`,
-            java.lang.System.`out`,
-            java.lang.System.err,
-            os.Path(project.rootDir.toPath()),
-            scala.`None$`.empty(),
-            scala.`None$`.empty()
-        )
-    }
-}
-
-tasks.register("enableSolrCustomization") {
-    dependsOn("symlinkSolrConfig", "manifestWithSolr")
-    group = "Bootstrap"
-    description = "Prepare Solr configuration for both local development and customization"
-}
-
-tasks.register<GradleBuild>("setupLocalDev") {
-    mustRunAfter("generateCode", "setupConfigFolder")
-    buildFile = file("build.gradle.kts")
-    tasks = listOf("setupLocalDevelopment")
-}
-
-//** combine all of the above
-tasks.register("bootstrapNewProject") {
-    dependsOn("generateCode", "setupConfigFolder", "setupLocalDev")
-    group = "Bootstrap"
-    description = "Bootstrap a new SAP Commerce project"
-    doLast {
-        println("")
-        println("==== Project generation finished! ====")
-        println("- Generated extensions:")
-        file("hybris/bin/custom/${inputName()}").listFiles().sortedBy{ it.name }.forEach {
-            println("\t${it.name}")
+        println("Pinning Solr version to ${majorMinor} in manifest.json")   
+        ant.withGroovyBuilder {
+            "replace"(
+                "file" to "manifest.jsonnet",
+                "token" to "solrVersion=null",
+                "value" to "solrVersion='${majorMinor}'"
+            )
         }
-        println("- Generated new manifest.json (using manifest.jsonnet)")
-        println("")
-        println("If you plan to customize Solr, please execute:")
-        println("./gradlew -b bootstrap.gradle.kts enableSolrCustomization")
+        generateManifest()
     }
 }
-
-defaultTasks("bootstrapNewProject")

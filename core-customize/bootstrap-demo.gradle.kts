@@ -1,7 +1,6 @@
 plugins {
-    id("sap.commerce.build") version("3.0.0")
-    id("sap.commerce.build.ccv2") version("3.0.0")
-    id("de.undercouch.download") version("4.1.1")
+    id("sap.commerce.build") version("3.4.0")
+    id("sap.commerce.build.ccv2") version("3.4.0")
 }
 
 buildscript {
