@@ -15,7 +15,7 @@
 >    ./gradlew -b bootstrap.gradle.kts \
 >      -PprojectName=<name, e.g. coolshop> \
 >      -ProotPackage=<package, e.g. com.cool.shop> \
->      -PintExtPackVersion=2102.0 # (optional) enable "SAP Commerce Cloud, Integration Extension Pack"
+>      -PintExtPackVersion=2102.1 # (optional) enable "SAP Commerce Cloud, Integration Extension Pack"
 >    ```
 >
 >    Read the output!
@@ -147,7 +147,7 @@ including the `spartacussampledata` extension (necessary to demo the Spartacus s
 
 To generate the demo, run:
 ```
-./gradlew bootstrap-demo.gradle.kts
+./gradlew -b bootstrap-demo.gradle.kts
 ```
 [spartacussample]: https://sap.github.io/spartacus-docs/spartacussampledata-extension/
 [recipe]: https://help.sap.com/viewer/a74589c3a81a4a95bf51d87258c0ab15/2011/en-US/f09d46cf4a2546b586ed7021655e4715.html

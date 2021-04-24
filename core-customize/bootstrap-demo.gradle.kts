@@ -1,144 +1,132 @@
 plugins {
-    id("sap.commerce.build") version("3.4.0")
-    id("sap.commerce.build.ccv2") version("3.4.0")
+    id("de.undercouch.download") version("4.1.1")
+    id("sap.commerce.build") version("3.5.0")
+    id("sap.commerce.build.ccv2") version("3.5.0")
 }
-
 buildscript {
     repositories {
         mavenCentral()
     }
     dependencies {
-        "classpath"(group = "com.lihaoyi", name = "sjsonnet_2.13", version = "0.1.6")
+        classpath("com.databricks:sjsonnet_2.13:0.4.0")
+        classpath("io.github.java-diff-utils:java-diff-utils:4.5")
     }
 }
-
 import mpern.sap.commerce.build.tasks.HybrisAntTask
-import org.apache.tools.ant.taskdefs.condition.Os
+import com.github.difflib.UnifiedDiffUtils
+import com.github.difflib.DiffUtils
 
-repositories {
-    flatDir { dirs("dependencies") }
-    mavenCentral()
+val bootstrapDemo = tasks.register("bootstrapDemo") {
+    group = "Boostrap"
+    description = "Bootstrap demo project based on 'cx' recipe"
 }
 
-// ---------------------------------------------------
-// Helper tasks to boostrap the project from scratch.
-// *Those are only necessary because I don't want to add any properietary files owned by SAP to Github.*
+defaultTasks("bootstrapDemo")
 
-//** generate code
-// ant modulegen -Dinput.module=accelerator -Dinput.name=demoshop -Dinput.package=com.demo.shop
-tasks.register<HybrisAntTask>("generateDemoStorefront") {
-    dependsOn("bootstrapPlatform", "createDefaultConfig")
-
-    args("modulegen")
-    antProperty("input.module", "accelerator")
-    antProperty("input.name", "demoshop")
-    antProperty("input.package", "com.demo.shop")
+tasks.register<GradleBuild>("bootstrapDefaultProject") {
+    buildFile = file("bootstrap.gradle.kts")
+    startParameter.projectProperties = mapOf(
+        "projectName" to "demoshop",
+        "rootPackage" to "com.demo.shop"
+    )
 }
-
+bootstrapDemo.configure {
+    dependsOn("bootstrapDefaultProject")
+}
 tasks.register("fixcmsflexcomponent") {
-    mustRunAfter("generateDemoStorefront")
+    dependsOn("bootstrapDefaultProject")
     doLast {
         ant.withGroovyBuilder {
             "touch"("file" to "hybris/bin/custom/demoshop/demoshopstorefront/web/webroot/WEB-INF/views/responsive/cms/cmsflexcomponent.jsp")
         }
     }
 }
+tasks.register<de.undercouch.gradle.tasks.download.Download>("downloadSpartacusSampleData") {
+    src("https://github.com/SAP/spartacus/releases/download/storefront-3.2.0/spartacussampledata.2005.zip")
+    dest("dependencies")
+    onlyIfModified(true)
+    useETag(true)
+}
 
+tasks.register<Copy>("unpackSpartacus") {
+    dependsOn("downloadSpartacusSampleData", "bootstrapDefaultProject")
+    from(zipTree("dependencies/spartacussampledata.2005.zip"))
+    into("hybris/bin/custom")
+    eachFile {
+        val newPath = relativePath.segments.drop(1).toMutableList()
+        newPath.add(0, "spartacussampledata")
+        relativePath = RelativePath(true, *newPath.toTypedArray())  
+    }
+    includeEmptyDirs = false
+}
 // ant extgen -Dinput.template=yacceleratorordermanagement -Dinput.name=demoshopordermanagement -Dinput.package=com.demo.shop.ordermanagement
 tasks.register<HybrisAntTask>("generateDemoOrderManagment") {
-    dependsOn("bootstrapPlatform", "createDefaultConfig")
+    dependsOn("bootstrapDefaultProject")
 
     args("extgen")
     antProperty("input.template", "yacceleratorordermanagement")
     antProperty("input.name", "demoshopordermanagement")
     antProperty("input.package", "com.demo.shop.ordermanagement")
 }
-
-// ant extgen -Dinput.template=yocc -Dinput.name=demoshopocc -Dinput.package=com.demo.shop.occ
-tasks.register<HybrisAntTask>("generateDemoOcc") {
-    dependsOn("bootstrapPlatform", "createDefaultConfig")
-
-    args("extgen")
-    antProperty("input.template", "yocc")
-    antProperty("input.name", "demoshopocc")
-    antProperty("input.package", "com.demo.shop.occ")
+tasks.register("extraExtensions") {
+    dependsOn("unpackSpartacus", "generateDemoOrderManagment", "fixcmsflexcomponent")
 }
 
-// ant extgen -Dinput.template=yocc -Dinput.name=demoshopocc -Dinput.package=com.demo.shop.occ.tests
-tasks.register<HybrisAntTask>("generateDemoOccTests") {
-    dependsOn("bootstrapPlatform", "createDefaultConfig")
+val extrasFolder = file("bootstrap/demo/config-extras")
+val configFolder = file("hybris/config")
 
-    args("extgen")
-    antProperty("input.template", "yocctests")
-    antProperty("input.name", "demoshopocctests")
-    antProperty("input.package", "com.demo.shop.occ.tests")
+tasks.register<Copy>("copyExtraConfig") {
+    dependsOn("extraExtensions")
+    from(extrasFolder) {
+        exclude("**/*.properties")
+    }
+    into(configFolder)
+    duplicatesStrategy = DuplicatesStrategy.INCLUDE
 }
 
-tasks.register<de.undercouch.gradle.tasks.download.Download>("downloadSpartacusSampleData") {
-    src("https://github.com/SAP/spartacus/releases/download/storefront-3.1.0/spartacussampledata.2005.zip")
-    dest("dependencies")
-}
+val patchProps = tasks.register("patchProperties")
 
-tasks.register<Copy>("unpackSpartacus") {
-    dependsOn("downloadSpartacusSampleData")
-    from(zipTree("dependencies/spartacussampledata.2005.zip"))
-    into("hybris/bin/custom/spartacussampledata")
-    includeEmptyDirs = false
-}
-
-tasks.register("generateCode") {
-    dependsOn("generateDemoStorefront", "fixcmsflexcomponent", "generateDemoOrderManagment", "generateDemoOcc", "generateDemoOccTests", "unpackSpartacus")
+extrasFolder
+.walk()
+.filter{it.isFile() && it.extension.equals("properties")}
+.forEach{
+    val relative = it.relativeTo(extrasFolder)
+    val target = configFolder.resolve(relative)
+    val patch = tasks.register("patchProperties_${relative.toString().replace("[/\\\\]".toRegex(), "-")}") {
+        dependsOn("extraExtensions")
         doLast {
-        ant.withGroovyBuilder {
-            "move"("file" to "hybris/bin/custom/demoshopordermanagement", "todir" to "hybris/bin/custom/demoshop")
+            var newContent = ""
+            if (target.exists()) {
+                newContent = target.readText()
+                newContent += "\n"
+            }
+            newContent += it.readText()
+            target.writeText(newContent)
         }
-        ant.withGroovyBuilder {
-            "move"("file" to "hybris/bin/custom/demoshopocc", "todir" to "hybris/bin/custom/demoshop")
-        }
-        ant.withGroovyBuilder {
-            "move"("file" to "hybris/bin/custom/demoshopocctests", "todir" to "hybris/bin/custom/demoshop")
-        }
+    }
+    patchProps.configure{
+        dependsOn(patch)
     }
 }
 
-//** setup hybris/config folder
-tasks.register<Copy>("mergeConfigFolder") {
-    mustRunAfter("generateCode")
-    from("bootstrap/demo/config-template")
-    into("hybris/config")
-}
-tasks.register<Exec>("symlinkCommonProperties") {
-    dependsOn("mergeConfigFolder")
-    if (Os.isFamily(Os.FAMILY_UNIX)) {
-        commandLine("sh", "-c", "ln -sfn ../environments/common.properties 10-local.properties")
-    } else {
-        // https://blogs.windows.com/windowsdeveloper/2016/12/02/symlinks-windows-10/
-        commandLine("cmd", "/c", """mklink /d "10-local.properties" "..\\environments\\common.properties" """)
-    }
-    workingDir("hybris/config/local-config")
-}
-tasks.register<Exec>("symlinkLocalDevProperties") {
-    dependsOn("mergeConfigFolder")
-     if (Os.isFamily(Os.FAMILY_UNIX)) {
-        commandLine("sh", "-c", "ln -sfn ../environments/local-dev.properties 50-local.properties")
-    } else {
-        // https://blogs.windows.com/windowsdeveloper/2016/12/02/symlinks-windows-10/
-        commandLine("cmd", "/c", """mklink /d "50-local.properties" "..\\environments\\local-dev.properties" """)
-    }
-    workingDir("hybris/config/local-config")
-}
-tasks.register<WriteProperties>("generateLocalProperties") {
-    mustRunAfter("mergeConfigFolder")
-    comment = "GENEREATED AT " + java.time.Instant.now()
-    outputFile = project.file("hybris/config/local.properties")
-
-    property("hybris.optional.config.dir", project.file("hybris/config/local-config"))
-}
-
-tasks.register("generateManifest") {
+val manifestJsonnet = file("manifest.jsonnet")
+tasks.register("patchManifestJsonnet") {
+    mustRunAfter("bootstrapDefaultProject")
     doLast {
-        sjsonnet.SjsonnetMain.main0(
-            arrayOf("--output-file", "manifest.json", "bootstrap/demo/manifest.jsonnet"),
+        val original = manifestJsonnet.readLines()
+        val diff = file("bootstrap/demo/manifest.jsonnet.patch").readLines()
+
+        val patch = UnifiedDiffUtils.parseUnifiedDiff(diff);
+        val result = DiffUtils.patch(original, patch);
+
+        manifestJsonnet.writeText(result.joinToString("\n"))
+    }
+}
+tasks.register("regenerateManifest") {
+    dependsOn("patchManifestJsonnet")
+    doLast {
+    sjsonnet.SjsonnetMain.main0(
+            arrayOf("--output-file", "manifest.json", "manifest.jsonnet"),
             sjsonnet.SjsonnetMain.createParseCache(),
             java.lang.System.`in`,
             java.lang.System.`out`,
@@ -149,20 +137,16 @@ tasks.register("generateManifest") {
         )
     }
 }
-
-tasks.register("setupConfigFolder") {
-    dependsOn("symlinkCommonProperties", "symlinkLocalDevProperties", "generateLocalProperties", "generateManifest")
+tasks.register("updateConfiguration") {
+    dependsOn("copyExtraConfig", "patchProperties", "regenerateManifest")
 }
 
-tasks.register<GradleBuild>("setupLocalDev") {
-    mustRunAfter("generateCode", "setupConfigFolder")
-    buildFile = file("build.gradle.kts")
-    tasks = listOf("setupLocalDevelopment")
+bootstrapDemo.configure {
+    dependsOn("updateConfiguration")
+    doLast {
+        println("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
+        println("!!! To finish the setup please run  !!!")
+        println("!!! ./gradlew setupLocalDevelopment !!!")
+        println("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
+    }
 }
-
-//** combine all of the above
-tasks.register("bootstrapDemo") {
-    dependsOn("generateCode", "setupConfigFolder", "setupLocalDev")
-}
-
-defaultTasks("bootstrapDemo")

@@ -1,2 +1,0 @@
-UPDATE CronJob[batchmode = true]; itemtype(code)[unique = true]; logToDatabase;
-                                ; SolrIndexerCronJob           ; false        ;

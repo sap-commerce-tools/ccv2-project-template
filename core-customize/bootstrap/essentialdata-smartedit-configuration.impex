@@ -1,4 +1,6 @@
-# ref. https://help.sap.com/viewer/d0224eca81e249cb821f2cdf45a82ace/LATEST/en-US/8beedbec8669101491c4a5cd1ffc4465.html
+# ref.
+# https://help.sap.com/viewer/d0224eca81e249cb821f2cdf45a82ace/LATEST/en-US/8beedbec8669101491c4a5cd1ffc4465.html
+# https://sap.github.io/spartacus-docs/smartEdit-setup-instructions-for-spartacus/#configuring-smartedit-to-work-with-spartacus-32-or-newer
 
 # Import config properties into impex macros
 UPDATE GenericItem[processor=de.hybris.platform.commerceservices.impex.impl.ConfigPropertyImportProcessor];pk[unique=true]
@@ -10,8 +12,9 @@ UPDATE GenericItem[processor=de.hybris.platform.commerceservices.impex.impl.Conf
 # ;electronics;$storeFront/?site=electronics
 # ;electronics-spa;$jsApp
 
-# Smartedit: Whitelist *all* storefronts on CCv2
-## whitelisting entries support regex
+# TODO: update Smartedit allowlist
+# Default: local dev and storefronts on CCv2 using the default urls
+# whitelisting entries support regex
 INSERT_UPDATE SmartEditConfiguration;key[unique=true];value
 ;whiteListedStorefronts;"[
   ""https://localhost:4200"",

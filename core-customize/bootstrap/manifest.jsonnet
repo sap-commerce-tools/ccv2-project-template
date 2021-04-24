@@ -9,6 +9,7 @@ local nonstandard_context_paths = {
   maintenanceweb: '/maintenance',
   commercewebservices: '/occ',
   ycommercewebservices: '/rest',
+  scimwebservices: '/scim',
   orbeonweb: '/web-orbeon',
 };
 
@@ -29,13 +30,11 @@ local storefrontExtension = '@projectName@storefront';
 local storefrontContextRoot = '';
 local storefrontAddons = [
   'smarteditaddon',
-  //TODO: add more addon names as required here
+  //TODO: add more addons as required here
   //      don't forget to add them to localextensions.xml too!
 ];
 
 local smartEditWebapps = [
-  //TODO: add/remove smartedit features here
-  //      don't forget to add the extensions to localextensions.xml too!
   // Activating SmartEdit for a Storefront
   // https://help.sap.com/viewer/1be46286b36a4aa48205be5a96240672/SHIP/en-US/7d3f83250d9846518f4154cfb18ae051.html
   // Default Smartedit webapps
@@ -47,6 +46,8 @@ local smartEditWebapps = [
   webapp('cmswebservices'),
   webapp('permissionswebservices'),
   webapp('previewwebservices'),
+  //TODO: add/remove smartedit features here
+  //      don't forget to add the extensions to localextensions.xml too!
   // // Smartedit personalization
   // webapp('personalizationsmartedit'),
   // webapp('personalizationwebservices'),
@@ -62,7 +63,7 @@ local smartEditWebapps = [
 
 // ------------ MANIFEST ------------
 function(intExtPackVersion=null, solrVersion=null, solrCustom='solr') {
-  commerceSuiteVersion: '2011.4',
+  commerceSuiteVersion: '2011.6',
   useCloudExtensionPack: false,
   extensionPacks: [
   ] + if intExtPackVersion != null then [
@@ -80,27 +81,31 @@ function(intExtPackVersion=null, solrVersion=null, solrCustom='solr') {
   useConfig: {
     properties: [
       {
-        location: 'hybris/config/environments/common.properties',
+        location: 'hybris/config/cloud/common.properties',
       },
       {
-        location: 'hybris/config/environments/accstorefront.properties',
+        location: 'hybris/config/cloud/aspect/accstorefront.properties',
         aspect: 'accstorefront',
       },
       {
-        location: 'hybris/config/environments/api.properties',
+        location: 'hybris/config/cloud/aspect/api.properties',
         aspect: 'api',
       },
       {
-        location: 'hybris/config/environments/backoffice.properties',
+        location: 'hybris/config/cloud/aspect/backoffice.properties',
         aspect: 'backoffice',
       },
       {
-        location: 'hybris/config/environments/backgroundprocessing.properties',
+        location: 'hybris/config/cloud/aspect/backgroundprocessing.properties',
         aspect: 'backgroundProcessing',
       },
       {
-        location: 'hybris/config/environments/admin.properties',
+        location: 'hybris/config/cloud/aspect/admin.properties',
         aspect: 'admin',
+      },
+      {
+        location: 'hybris/config/cloud/persona/development.properties',
+        persona: 'development',
       },
     ],
     extensions: {

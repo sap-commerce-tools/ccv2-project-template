@@ -1,6 +1,6 @@
 plugins {
-    id("sap.commerce.build") version("3.4.0")
-    id("sap.commerce.build.ccv2") version("3.4.0")
+    id("sap.commerce.build") version("3.5.0")
+    id("sap.commerce.build.ccv2") version("3.5.0")
     id("de.undercouch.download") version("4.1.1")
 }
 import mpern.sap.commerce.build.tasks.HybrisAntTask
@@ -22,9 +22,11 @@ repositories {
 if (project.hasProperty("sUser") && project.hasProperty("sUserPass")) {
     val SUSER = project.property("sUser") as String
     val SUSERPASS = project.property("sUserPass") as String
+
+    val COMMERCE_VERSION = CCV2.manifest.commerceSuiteVersion
     tasks.register<Download>("downloadPlatform") {
-        src("https://softwaredownloads.sap.com/file/0020000000342432021")
-        dest(file("${DEPENDENCY_FOLDER}/hybris-commerce-suite-${CCV2.manifest.commerceSuiteVersion}.zip"))
+        src("https://softwaredownloads.sap.com/file/0020000000576342021")
+        dest(file("${DEPENDENCY_FOLDER}/hybris-commerce-suite-${COMMERCE_VERSION}.zip"))
         username(SUSER)
         password(SUSERPASS)
         overwrite(false)
@@ -34,10 +36,10 @@ if (project.hasProperty("sUser") && project.hasProperty("sUserPass")) {
     }
 
     tasks.register<Verify>("downloadAndVerifyPlatform") {
-        dependsOn("downloadPlatform")
-        src(file("dependencies/hybris-commerce-suite-${CCV2.manifest.commerceSuiteVersion}.zip"))
+        dependsOn("downloadPlatform") 
+        src(file("dependencies/hybris-commerce-suite-${COMMERCE_VERSION}.zip"))
         algorithm("SHA-256")
-        checksum("5a96db9d91b5136d48f742ac0575981bbf11aadd79e2a45e357cdf9a8b3d434b")
+        checksum("f4d1e50a500288c5cc80fc33e60420d363fefcac4443ffa6ea779f51fbc88e0e")
     }
 
     tasks.named("bootstrapPlatform") {
@@ -46,9 +48,10 @@ if (project.hasProperty("sUser") && project.hasProperty("sUserPass")) {
 
     //check if Integration Extension Pack is configured and download it too
     if (CCV2.manifest.extensionPacks.any{"hybris-commerce-integrations".equals(it.name)}) {
+        val INTEXTPACK_VERSION = CCV2.manifest.extensionPacks.first{"hybris-commerce-integrations".equals(it.name)}.version
         tasks.register<Download>("downloadIntExtPack") {
-            src("https://softwaredownloads.sap.com/file/0020000000267192021")
-            dest(file("${DEPENDENCY_FOLDER}/hybris-commerce-integrations-${CCV2.manifest.extensionPacks.first{"hybris-commerce-integrations".equals(it.name)}.version}.zip"))
+            src("https://softwaredownloads.sap.com/file/0020000000567972021")
+            dest(file("${DEPENDENCY_FOLDER}/hybris-commerce-integrations-${INTEXTPACK_VERSION}.zip"))
             username(SUSER)
             password(SUSERPASS)
             overwrite(false)
@@ -59,9 +62,9 @@ if (project.hasProperty("sUser") && project.hasProperty("sUserPass")) {
 
         tasks.register<Verify>("downloadAndVerifyIntExtPack") {
             dependsOn("downloadIntExtPack")
-            src(file("dependencies/hybris-commerce-integrations-${CCV2.manifest.extensionPacks.first{"hybris-commerce-integrations".equals(it.name)}.version}.zip"))
+            src(file("${DEPENDENCY_FOLDER}/hybris-commerce-integrations-${INTEXTPACK_VERSION}.zip"))
             algorithm("SHA-256")
-            checksum("abbc1abaea29241a9af2fc50516b36c7d782091121927378028012343d1e0bf1")
+            checksum("0361e959583bcacdfd24de40611fd64d41fa0313090a217b02163e2e8683460a")
         }
 
         tasks.named("bootstrapPlatform") {
@@ -78,15 +81,10 @@ tasks.register<WriteProperties>("generateLocalProperties") {
 }
 
 // https://help.sap.com/viewer/b2f400d4c0414461a4bb7e115dccd779/LATEST/en-US/784f9480cf064d3b81af9cad5739fecc.html
-tasks.register("enableModeltMock") {
-    onlyIf {
-        !file("hybris/bin/custom/extras/modelt/extensioninfo.xml").exists()
-    }
-    doLast {
-         ant.withGroovyBuilder {
-            "copy"("file" to "hybris/bin/custom/extras/modelt/extensioninfo.disabled", "tofile" to "hybris/bin/custom/extras/modelt/extensioninfo.xml")
-        }
-    }
+tasks.register<Copy>("enableModeltMock") {
+    from("hybris/bin/custom/extras/modelt/extensioninfo.disabled")
+    into("hybris/bin/custom/extras/modelt/")
+    rename { "extensioninfo.xml" }
 }
 
 tasks.named("installManifestAddons") {

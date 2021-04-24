@@ -1,0 +1,86 @@
+--- manifest.jsonnet	2021-04-25 07:07:10.000000000 +0200
++++ manifest.jsonnet	2021-04-25 07:07:58.000000000 +0200
+@@ -30,8 +30,39 @@
+ local storefrontContextRoot = '';
+ local storefrontAddons = [
+   'smarteditaddon',
+-  //TODO: add more addons as required here
+-  //      don't forget to add them to localextensions.xml too!
++  
++  'adaptivesearchsamplesaddon',
++  'assistedservicecustomerinterestsaddon',
++  'assistedservicepromotionaddon',
++  'assistedservicestorefront',
++  'assistedserviceyprofileaddon',
++  'captchaaddon',
++  'configurablebundleaddon',
++  'consignmenttrackingaddon',
++  'customercouponaddon',
++  'customercouponsamplesaddon',
++  'customerinterestsaddon',
++  'customerticketingaddon',
++  'eventtrackingwsaddon',
++  'merchandisingaddon',
++  'merchandisingstorefrontsampledataaddon',
++  'multicountrysampledataaddon',
++  'notificationaddon',
++  'ordermanagementaddon',
++  'orderselfserviceaddon',
++  'pcmbackofficesamplesaddon',
++  'personalizationaddon',
++  'personalizationsampledataaddon',
++  'personalizationyprofilesampledataaddon',
++  'profiletagaddon',
++  'selectivecartsplitlistaddon',
++  'stocknotificationaddon',
++  'textfieldconfiguratortemplateaddon',
++  'timedaccesspromotionengineaddon',
++  'timedaccesspromotionenginesamplesaddon',
++  'xyformssamples',
++  'xyformsstorefrontcommons',
++  'ysapproductconfigaddon',
+ ];
+ 
+ local smartEditWebapps = [
+@@ -46,19 +77,18 @@
+   webapp('cmswebservices'),
+   webapp('permissionswebservices'),
+   webapp('previewwebservices'),
+-  //TODO: add/remove smartedit features here
+-  //      don't forget to add the extensions to localextensions.xml too!
+-  // // Smartedit personalization
+-  // webapp('personalizationsmartedit'),
+-  // webapp('personalizationwebservices'),
+-  // // Smartedit personalization promotion
+-  // webapp('personalizationpromotionssmartedit'),
+-  // // Smartedit personalization search
+-  // webapp('personalizationsearchsmartedit'),
+-  // // Smartedit promotion
+-  // webapp('merchandisingcmswebservices'),
+-  // // https://help.sap.com/viewer/50c996852b32456c96d3161a95544cdb/1905/en-US/b21fa18f635d49eaa4d9ce5997a6a814.html
+-  // webapp('merchandisingsmartedit'),
++  
++  // Smartedit personalization
++  webapp('personalizationsmartedit'),
++  webapp('personalizationwebservices'),
++  // Smartedit personalization promotion
++  webapp('personalizationpromotionssmartedit'),
++  // Smartedit personalization search
++  webapp('personalizationsearchsmartedit'),
++  // Smartedit promotion
++  webapp('merchandisingcmswebservices'),
++  // https://help.sap.com/viewer/50c996852b32456c96d3161a95544cdb/1905/en-US/b21fa18f635d49eaa4d9ce5997a6a814.html
++  webapp('merchandisingsmartedit'),
+ ];
+ 
+ // ------------ MANIFEST ------------
+@@ -139,6 +169,9 @@
+       webapps: [
+         webapp(storefrontExtension, storefrontContextRoot),
+         webapp('mediaweb'),
++
++        webapp('orbeonweb'),
++        webapp('xyformsweb'),
+       ],
+     },
+     {

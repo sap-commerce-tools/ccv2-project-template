@@ -1,6 +1,6 @@
 plugins {
-    id("sap.commerce.build") version("3.4.0")
-    id("sap.commerce.build.ccv2") version("3.4.0")
+    id("sap.commerce.build") version("3.5.0")
+    id("sap.commerce.build.ccv2") version("3.5.0")
 }
 
 buildscript {
@@ -8,10 +8,9 @@ buildscript {
         mavenCentral()
     }
     dependencies {
-        "classpath"(group = "com.lihaoyi", name = "sjsonnet_2.13", version = "0.1.6")
+        classpath("com.databricks:sjsonnet_2.13:0.4.0")
     }
 }
-
 import mpern.sap.commerce.build.tasks.HybrisAntTask
 import org.apache.tools.ant.taskdefs.condition.Os
 
@@ -38,6 +37,10 @@ fun inputPackage(): String {
     return (project.property("rootPackage") as String)
 }
 
+apply(from = "bootstrap-extras.gradle.kts")
+tasks.named("createDefaultConfig") {
+    dependsOn("bootstrapExtras")
+}
 
 //** generate code
 // ant modulegen -Dinput.module=accelerator -Dinput.name=demoshop -Dinput.package=com.demo.shop
@@ -142,25 +145,29 @@ tasks.register("generateManifest") {
     }
 }
 
-tasks.register<Exec>("symlinkCommonProperties") {
-    dependsOn("mergeConfigFolder")
-    if (Os.isFamily(Os.FAMILY_UNIX)) {
-        commandLine("sh", "-c", "ln -sfn ../environments/common.properties 10-local.properties")
-    } else {
-        // https://blogs.windows.com/windowsdeveloper/2016/12/02/symlinks-windows-10/
-        commandLine("cmd", "/c", """mklink /d "10-local.properties" "..\\environments\\common.properties" """)
+val localDev = mapOf(
+    "10-local.properties" to file("hybris/config/cloud/common.properties"),
+    "20-local.properties" to file("hybris/config/cloud/persona/development.properties"),
+    "50-local.properties" to file("hybris/config/cloud/local-dev.properties")
+)
+val localConfig = file("hybris/config/local-config")
+val symlink = tasks.register("symlinkConfig")
+localDev.forEach{
+    val singleLink = tasks.register<Exec>("symlink${it.key}") {
+        dependsOn("mergeConfigFolder")
+        val path = it.value.relativeTo(localConfig)
+        if (Os.isFamily(Os.FAMILY_UNIX)) {
+            commandLine("sh", "-c", "ln -sfn ${path} ${it.key}")
+        } else {
+            // https://blogs.windows.com/windowsdeveloper/2016/12/02/symlinks-windows-10/
+            val windowsPath = path.toString().replace("[/]".toRegex(), "\\")
+            commandLine("cmd", "/c", """mklink /d "${it.key}" "${windowsPath}" """)
+        }
+        workingDir(localConfig)
     }
-    workingDir("hybris/config/local-config")
-}
-tasks.register<Exec>("symlinkLocalDevProperties") {
-    dependsOn("mergeConfigFolder")
-     if (Os.isFamily(Os.FAMILY_UNIX)) {
-        commandLine("sh", "-c", "ln -sfn ../environments/local-dev.properties 50-local.properties")
-    } else {
-        // https://blogs.windows.com/windowsdeveloper/2016/12/02/symlinks-windows-10/
-        commandLine("cmd", "/c", """mklink /d "50-local.properties" "..\\environments\\local-dev.properties" """)
+    symlink.configure {
+        dependsOn(singleLink)
     }
-    workingDir("hybris/config/local-config")
 }
 
 tasks.register<WriteProperties>("generateLocalProperties") {
@@ -172,13 +179,7 @@ tasks.register<WriteProperties>("generateLocalProperties") {
 }
 
 tasks.register("setupConfigFolder") {
-    dependsOn("symlinkCommonProperties", "symlinkLocalDevProperties", "generateLocalProperties", "generateManifest")
-}
-
-tasks.register("enableSolrCustomization") {
-    dependsOn("symlinkSolrConfig", "manifestWithSolr")
-    group = "Bootstrap"
-    description = "Prepare Solr configuration for both local development and customization"
+    dependsOn(symlink, "generateLocalProperties", "generateManifest")
 }
 
 tasks.register<GradleBuild>("setupLocalDev") {
@@ -204,14 +205,20 @@ tasks.register("bootstrapNewProject") {
         }
         println("- Generated new manifest.json (using manifest.jsonnet)")
         println("")
-        println("(optional) To enable Solr customization, please execute:")
-        println("./gradlew -b bootstrap.gradle.kts enableSolrCustomization")
+        println("? (optional)")
+        println("? If you plan to customize the Solr configuration of your project, please execute:")
+        println("? ./gradlew -b bootstrap.gradle.kts enableSolrCustomization")
     }
 }
 
 defaultTasks("bootstrapNewProject")
 
 //******* Optional: Bootstrap Solr customization *******
+tasks.register("enableSolrCustomization") {
+    dependsOn("symlinkSolrConfig", "manifestWithSolr")
+    group = "Bootstrap"
+    description = "Prepare Solr configuration for both local development and customization"
+}
 tasks.register<HybrisAntTask>("startSolr") {
     args("startSolrServers")
 }
