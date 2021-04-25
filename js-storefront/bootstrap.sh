@@ -44,7 +44,7 @@ then
 fi
 
 NG_VERSION="$(ng version | grep '@angular-devkit/core' | awk '{ print $2 }')"
-if case $NG_VERSION in 10*) false;; *) true;; esac; then
+if case $NG_VERSION in 10.*) false;; *) true;; esac; then
     error "Wrong angular version, please use Angular 10 (@angular/cli@v10-lts)"
     exit 1
 fi
@@ -58,26 +58,20 @@ ng new "$NAME" \
   --packageManager=yarn
 (
     cd "$NAME" || exit 1
-    progress "Adding Spartacus"
-    ng add @spartacus/schematics --pwa --ssr
-    # yarn install
-    progress "Setting up SmartEdit support"
-    INJECTOR="../../core-customize/hybris/bin/modules/smartedit/smarteditaddon/acceleratoraddon/web/webroot/_ui/shared/common/js/webApplicationInjector.js"
-    if [ -f "$INJECTOR" ]; then
-        cp "$INJECTOR" "src/assets"
-    else
-        warning "webApplicationInjector.js not found"
-        warning "Please copy into the src/assets folder to enable SmartEdit"
-    fi
+    progress "Adding Spartacus (PWA and SSR enabled)"
+    echo "> Recommended minimal features: Cart, Product, SmartEdit"
+    ng add @spartacus/schematics \
+      --pwa \
+      --ssr \
+      --useMetaTags
     progress "Applying optimizations"
     cp -r "../bootstrap/.vscode" .
     angular="$(grep -i '@angular/animations' package.json | awk '{ print $2 }')"
-    mkdir "patches"
-    for template in ../bootstrap/patches/*.tmpl; do
-        output="$(basename "$template")"
-        output="patches/$(printf "%s" "$output" | sed 's/\.[^.]*$//')"
-        sed "s/\$NAME/$NAME/g" "$template" > "$output.1"
-        sed "s/\$ANGULAR/$angular/g" "$output.1" > "$output"
+    mkdir -p "patches"
+    for template in ../bootstrap/patches/*.patch; do
+        output="patches/$(basename "$template")"
+        sed "s/@NAME@/$NAME/g" "$template" > "$output.1"
+        sed "s/@ANGULAR@/$angular/g" "$output.1" > "$output"
         rm "$output.1"
     done
     for patch in patches/*.patch; do
@@ -93,19 +87,25 @@ if [ -f "manifest.json" ]; then
 fi
 cat > manifest.json <<-EOF
 {
-    "applications": [{
-        "name": "$NAME",
-        "path": "$NAME",
-        "ssr": {
-            "enabled": true,
-            "path": "dist/$NAME/server/main.js"
+    "applications": [
+        {
+            "name": "$NAME",
+            "path": "$NAME",
+            "ssr": {
+                "enabled": true,
+                "path": "dist/$NAME/server/main.js"
+            },
+            "csr": {
+                "webroot": "dist/$NAME/browser/"
+            }
         }
-    }]
+    ],
+    "nodeVersion": "12"
 }
 EOF
 progress "FINISHED"
 echo "Next steps:"
 echo "- Update the baseSite.context with the correct baseSite, currency etc."
 echo "  https://sap.github.io/spartacus-docs/building-the-spartacus-storefront-from-libraries/#checking-appmodulets-for-base-url-and-other-settings"
-echo "- (optional) Update smartedit whitelisting in src/index.html"
-echo "  https://help.sap.com/viewer/9d346683b0084da2938be8a285c0c27a/LATEST/en-US/fb742b29cf3c4e81aac7c131c0441172.html"
+echo "- Update smartedit whitelisting in spartacus-configuration.module.ts"
+echo "  https://sap.github.io/spartacus-docs/smartEdit-setup-instructions-for-spartacus/#configuring-smartedit-to-work-with-spartacus-32-or-newer"
