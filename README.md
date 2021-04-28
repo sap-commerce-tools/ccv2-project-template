@@ -9,6 +9,11 @@
   - MS SQL
   - [Azurite](https://github.com/Azure/Azurite) (for cloud hotfolder)
 
+## How To
+
+- Clone/Download/Fork this repository
+- Follow the steps in the READMEs linked below
+
 ## SAP Commerce Setup
 
 [core-customize/README.md](core-customize/README.md)

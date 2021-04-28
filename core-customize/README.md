@@ -6,26 +6,27 @@
 >    using the correct file name, e.g.
 >
 >    ```bash
->    cp ~/Downloads/CXCOMM201100P*.ZIP ./platform/hybris-commerce-suite-2011.0.zip
+>    cp ~/Downloads/CXCOMM201100P*.ZIP ./platform/hybris-commerce-suite-2011.6.zip
 >    ```
 >    *Or* configure your S-User (e.g. using `gradle.properties`) and run `./gradlew downloadAndVerifyPlatform`
+>    
 > 1. Bootstrap the starting point for your Commerce project by running the following command:
 >
 >    ```bash
 >    ./gradlew -b bootstrap.gradle.kts \
 >      -PprojectName=<name, e.g. coolshop> \
 >      -ProotPackage=<package, e.g. com.cool.shop> \
->      -PintExtPackVersion=2102.1 # (optional) enable "SAP Commerce Cloud, Integration Extension Pack"
+>      -PintExtPackVersion=2102.1    # (optional) enable "SAP Commerce Cloud, Integration Extension Pack"
 >    ```
 >
 >    Read the output!
 >
 >    (If you use a headless setup: You can delete the generated `<projectName>storefront` extension
->     afterwards. Don't forget to remove it from `localextensions.xml` / `manifest.json` too)
+>     afterwards. Don't forget to remove it from `localextensions.xml` / `manifest.jsonnet` too)
 > 1. Review the generated configuration in `hybris/config`, especially the `hybris/config/environment/*.properties`
 >    files and `localextensions.xml` (search for `TODO:` comments)
 > 1. Update the `manifest.jsonnet` (again, search for `TODO:` comments).\
->    You can use the jsonnet file to update the `manifest.json` for your project.
+>    You can use the [jsonnet] file to update the `manifest.json` for your project.
 > 1. Delete all bootstrap files, you don't need them anymore:
 >
 >    ```bash
@@ -55,11 +56,13 @@ cd core-customize
 
 ###  How to use manifest.jsonnet?
 
-To generate the `manifest.json` with [Jsonnet](https://jsonnet.org/):
+To generate the `manifest.json` with [Jsonnet][jsonnet]:
 
 ```bash
 jsonnet --output-file manifest.json manifest.jsonnet
 ```
+
+[jsonnet]: https://jsonnet.org/
 
 ### How do I add an addon to my storefront?
 
@@ -67,7 +70,7 @@ jsonnet --output-file manifest.json manifest.jsonnet
 1. Run `./gradlew installManifestAddon`
 1. Reformat `<storefront>/extensioninfo.xml` (unfortunately, the the platform build messes it up when adding addons)
 1. Commit/push your changes
-1. Tell your team to run `./gradlew installManifestAddon` after pulling your changes, it this is not standard.
+1. Tell your team to run `./gradlew installManifestAddon` after pulling your changes.
 
 [addon]: https://help.sap.com/viewer/1be46286b36a4aa48205be5a96240672/LATEST/en-US/9a3ab7d08c704fccb7fd899e876d41d6.html
 
@@ -80,15 +83,15 @@ locally and in the cloud.
 This setup uses:
 
 - `hybris/config/localextensions.xml` to configure extensions
-- `hybris/config/environments/*.properties` to configure properties per CCv2 aspect.
-   There is one file per aspect, plus the special file `local-dev.properties` that configures the local development environment
+- `hybris/config/cloud/**/*.properties` to configure properties per CCv2 aspect and/or persona.
+   There is one file per aspect, plus the special file `local-dev.properties` that configures the local development environment.
 - `hybris/config/local-config` is configured as `hybris.optional.config.dir` and contains *symlinks* 
-  to the relevant property files in `hybris/config/environments` (by default: `common.properties` and `local-dev.properties`).\
+  to the relevant property files in `hybris/config/cloud` (by default: `common.properties`, `persona/development.properties` and `local-dev.properties`).\
   **Important** `local.properties` must not be modified at all (that's why it is in `.gitignore`).
   - If you have any configuration specific to your local machine, put it in `hybris/config/local-config/99-local.properties`.
-  - If the local setup changes for the whole project, update `hybris/config/environments/local-dev.properties`
-- The default cloud solr configuration set is contained in the correct folder structure for CCv2 ([documentation][solr]).
-  A symlink in `hybris/config/solr` allows to use the same configuration locally.
+  - If the local setup changes for the whole project, update `hybris/config/cloud/local-dev.properties`
+- If you enabled solr customization during bootstrap (`./gradle -b boostrap.gradle.kts enableSolrCustomization`), the default cloud solr configuration set is moved to the correct folder structure for CCv2 ([documentation][solr]).
+  A symlink in `hybris/config/solr` allows you to use the same configuration locally.
 
 ```
                                   core-customize
@@ -96,12 +99,12 @@ This setup uses:
                                   ├── hybris
                                   ├── ...
                                   │  ├── config
-                                  │  │  ├── environments
+                                  │  │  ├── cloud
                         +--------------------> accstorefront.properties
-                        |--------------------> admin.properties
-                        |--------------------> api.properties
-                        |--------------------> backgroundprocessing.properties
-                        |--------------------> backoffice.properties
+                        +--------------------> admin.properties
+                        +--------------------> api.properties
+                        +--------------------> backgroundprocessing.properties
+                        +--------------------> backoffice.properties
                         +--------------------> common.properties     <---+
                         |         │  │  │  └── local-dev.properties <--+ |
                         |         │  │  ├── ...                        | | symlinks

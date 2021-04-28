@@ -2,7 +2,7 @@
 
 To bootstrap a new Spartacus storefront, run:
 
-```
+```bash
 ./boostrap.sh <project name>
 ```
 
@@ -21,21 +21,21 @@ You can delete the `bootstrap` folder and script afterwards.
 ## What does the script do?
 
 - Bootstraps a new Spartacus project from scratch as recommended by the official documentation (with PWA and SSR support)
-- Enable optimizations:
-  - Configuration for "SAP Commerce in the Public Cloud" (aka CCv2) (including the [Smartedit setup][smartedit])
-  - Streamlined OCC settings (check [`src/environments`](src/environments) and [`app.module.ts`](src/app/app.module.ts#L10-L17)) and [SAP/spartacus#5886][issue]
+- Enable optimizations (patches in `bootstrap/patches`):
+  - Configuration for "SAP Commerce in the Public Cloud" (aka CCv2) (including [Smartedit setup][smartedit])
+  - CCv2-compatible OCC settings (ref [SAP/spartacus#5886][issue])
   - Minor tweaks to `package.json`:
     - Run production build on `yarn build` (see [Updating the Code Repository for JavaScript Storefronts][build])
     - Use SSL for local development server (`yarn start`)
-  - Enable SSR workaround for CCv2 ([SAP/spartacus#7993](https://github.com/SAP/spartacus/issues/7993))
-  - Setup SAP Commerce Cloud developer certificate for development SSR server
+    - Disable certificate checks for SSR development server (makes connection to local SAP Commerce development server possible)
   - [Recommended developer settings][developer] for [VS Code][code]
-- Generate a `manifest.json` for commerce cloud
+- Generate a `manifest.json` for CCv2 with correct settings for [Client Side][csr] and [Server Side Rendering][ssr]
 
-[spartacus]: https://github.com/SAP/cloud-commerce-spartacus-storefront
 [developer]: https://sap.github.io/cloud-commerce-spartacus-storefront-docs/recommended-development-environment/
 [code]: https://code.visualstudio.com/
 [build]: https://help.sap.com/viewer/b2f400d4c0414461a4bb7e115dccd779/LATEST/en-US/63577f67a67347bf9f4765a5385ead33.html
 [smartedit]: https://sap.github.io/cloud-commerce-spartacus-storefront-docs/smartEdit-setup-instructions-for-spartacus/
-[ssr]: https://sap.github.io/spartacus-docs/ssr-ccv2-issue-spartacus-version-2/
 [issue]: https://github.com/SAP/spartacus/issues/5886
+
+[ssr]: https://help.sap.com/viewer/b2f400d4c0414461a4bb7e115dccd779/LATEST/en-US/cd5b94c25a68456ba5840f942f33f68b.html
+[csr]: https://help.sap.com/viewer/b2f400d4c0414461a4bb7e115dccd779/LATEST/en-US/0d54fc7faaa44b14b15b164cb1f3f2b6.html
