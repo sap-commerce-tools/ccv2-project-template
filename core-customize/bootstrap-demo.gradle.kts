@@ -1,7 +1,7 @@
 plugins {
-    id("de.undercouch.download") version("4.1.1")
-    id("sap.commerce.build") version("3.5.0")
-    id("sap.commerce.build.ccv2") version("3.5.0")
+    id("sap.commerce.build") version("3.6.0")
+    id("sap.commerce.build.ccv2") version("3.6.0")
+    id("de.undercouch.download") version("4.1.2")
 }
 buildscript {
     repositories {
@@ -9,7 +9,7 @@ buildscript {
     }
     dependencies {
         classpath("com.databricks:sjsonnet_2.13:0.4.0")
-        classpath("io.github.java-diff-utils:java-diff-utils:4.5")
+        classpath("io.github.java-diff-utils:java-diff-utils:4.10")
     }
 }
 import mpern.sap.commerce.build.tasks.HybrisAntTask

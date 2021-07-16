@@ -1,7 +1,7 @@
 plugins {
-    id("sap.commerce.build") version("3.5.0")
-    id("sap.commerce.build.ccv2") version("3.5.0")
-    id("de.undercouch.download") version("4.1.1")
+    id("sap.commerce.build") version("3.6.0")
+    id("sap.commerce.build.ccv2") version("3.6.0")
+    id("de.undercouch.download") version("4.1.2")
 }
 import mpern.sap.commerce.build.tasks.HybrisAntTask
 import org.apache.tools.ant.taskdefs.condition.Os
