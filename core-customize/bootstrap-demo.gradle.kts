@@ -42,7 +42,7 @@ tasks.register("fixcmsflexcomponent") {
     }
 }
 tasks.register<de.undercouch.gradle.tasks.download.Download>("downloadSpartacusSampleData") {
-    src("https://github.com/SAP/spartacus/releases/download/storefront-3.2.0/spartacussampledata.2005.zip")
+    src("https://github.com/SAP/spartacus/releases/download/storefront-3.4.1/spartacussampledata.2011.zip")
     dest("dependencies")
     onlyIfModified(true)
     useETag(true)
@@ -50,13 +50,13 @@ tasks.register<de.undercouch.gradle.tasks.download.Download>("downloadSpartacusS
 
 tasks.register<Copy>("unpackSpartacus") {
     dependsOn("downloadSpartacusSampleData", "bootstrapDefaultProject")
-    from(zipTree("dependencies/spartacussampledata.2005.zip"))
-    into("hybris/bin/custom")
-    eachFile {
-        val newPath = relativePath.segments.drop(1).toMutableList()
-        newPath.add(0, "spartacussampledata")
-        relativePath = RelativePath(true, *newPath.toTypedArray())  
-    }
+    from(zipTree("dependencies/spartacussampledata.2011.zip"))
+    into("hybris/bin/custom/spartacussampledata")
+    // eachFile {
+    //     val newPath = relativePath.segments.drop(1).toMutableList()
+    //     newPath.add(0, "spartacussampledata")
+    //     relativePath = RelativePath(true, *newPath.toTypedArray())  
+    // }
     includeEmptyDirs = false
 }
 // ant extgen -Dinput.template=yacceleratorordermanagement -Dinput.name=demoshopordermanagement -Dinput.package=com.demo.shop.ordermanagement

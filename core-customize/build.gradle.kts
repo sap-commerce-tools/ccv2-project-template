@@ -25,7 +25,7 @@ if (project.hasProperty("sUser") && project.hasProperty("sUserPass")) {
 
     val COMMERCE_VERSION = CCV2.manifest.commerceSuiteVersion
     tasks.register<Download>("downloadPlatform") {
-        src("https://softwaredownloads.sap.com/file/0020000000576342021")
+        src("https://softwaredownloads.sap.com/file/0020000000989902021")
         dest(file("${DEPENDENCY_FOLDER}/hybris-commerce-suite-${COMMERCE_VERSION}.zip"))
         username(SUSER)
         password(SUSERPASS)
@@ -39,7 +39,7 @@ if (project.hasProperty("sUser") && project.hasProperty("sUserPass")) {
         dependsOn("downloadPlatform") 
         src(file("dependencies/hybris-commerce-suite-${COMMERCE_VERSION}.zip"))
         algorithm("SHA-256")
-        checksum("f4d1e50a500288c5cc80fc33e60420d363fefcac4443ffa6ea779f51fbc88e0e")
+        checksum("add4f893b349770c3f918042784b6c08ed7114ba5c98231f7de7e725b2a02803")
     }
 
     tasks.named("bootstrapPlatform") {
@@ -50,7 +50,7 @@ if (project.hasProperty("sUser") && project.hasProperty("sUserPass")) {
     if (CCV2.manifest.extensionPacks.any{"hybris-commerce-integrations".equals(it.name)}) {
         val INTEXTPACK_VERSION = CCV2.manifest.extensionPacks.first{"hybris-commerce-integrations".equals(it.name)}.version
         tasks.register<Download>("downloadIntExtPack") {
-            src("https://softwaredownloads.sap.com/file/0020000000567972021")
+            src("https://softwaredownloads.sap.com/file/0020000001002692021")
             dest(file("${DEPENDENCY_FOLDER}/hybris-commerce-integrations-${INTEXTPACK_VERSION}.zip"))
             username(SUSER)
             password(SUSERPASS)
@@ -64,7 +64,7 @@ if (project.hasProperty("sUser") && project.hasProperty("sUserPass")) {
             dependsOn("downloadIntExtPack")
             src(file("${DEPENDENCY_FOLDER}/hybris-commerce-integrations-${INTEXTPACK_VERSION}.zip"))
             algorithm("SHA-256")
-            checksum("0361e959583bcacdfd24de40611fd64d41fa0313090a217b02163e2e8683460a")
+            checksum("352fcb5b9b7b58ebc50f61873351e88ab343cbbd28955fd3332653d2284c266c")
         }
 
         tasks.named("bootstrapPlatform") {
