@@ -48,7 +48,8 @@ public class HybrisAwareThreadPoolTaskSchedulerTest
 	private static final Tenant TENANT = mock(Tenant.class);
 	private static final int POOL_SIZE = 3;
 	private static final RejectedExecutionHandler REJ_HANDLER = new ThreadPoolExecutor.AbortPolicy();
-	private static final int TERMINATION_TIMEOUT = 6;
+	private static final int TERMINATION_TIMEOUT_IN_SEC = 6;
+	private static final int TERMINATION_TIMEOUT_IN_MS = 6000;
 
 	@Spy
 	private HybrisAwareThreadPoolTaskScheduler scheduler = new HybrisAwareThreadPoolTaskScheduler();
@@ -60,7 +61,7 @@ public class HybrisAwareThreadPoolTaskSchedulerTest
 
 		scheduler.setRejectedExecutionHandler(REJ_HANDLER);
 		scheduler.setThreadFactory(THREAD_FACTORY);
-		scheduler.setAwaitTerminationSeconds(TERMINATION_TIMEOUT);
+		scheduler.setAwaitTerminationSeconds(TERMINATION_TIMEOUT_IN_SEC);
 		scheduler.setPoolSize(POOL_SIZE);
 
 		scheduler.afterPropertiesSet();
@@ -162,7 +163,7 @@ public class HybrisAwareThreadPoolTaskSchedulerTest
 		scheduler.shutdown();
 
 		final ScheduledExecutorService threadPoolExecutor = scheduler.getScheduledExecutor();
-		verify(threadPoolExecutor).awaitTermination(TERMINATION_TIMEOUT, TimeUnit.SECONDS);
+		verify(threadPoolExecutor).awaitTermination(TERMINATION_TIMEOUT_IN_MS, TimeUnit.MILLISECONDS);
 	}
 
 	@Test

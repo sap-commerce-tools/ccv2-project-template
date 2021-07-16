@@ -149,7 +149,7 @@ public class CloudUnZipTransformer extends AbstractZipTransformer
         /* If we see the relative traversal string of ".." we need to make sure
          * that the outputdir + name doesn't leave the outputdir.
          */
-        if (!destinationFile.getCanonicalPath().startsWith(workDirectory.getCanonicalPath()))
+        if (!destinationFile.getCanonicalPath().startsWith(workDirectory.getCanonicalPath() + File.separator))
         {
             throw new ZipException("The file " + zipEntryName +
                     " is trying to leave the target output directory of " + workDirectory);

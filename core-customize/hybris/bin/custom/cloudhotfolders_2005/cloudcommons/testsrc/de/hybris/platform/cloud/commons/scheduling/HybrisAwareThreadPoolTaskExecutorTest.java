@@ -53,7 +53,8 @@ public class HybrisAwareThreadPoolTaskExecutorTest
 	private static final int MAX_POOL_SIZE = 5;
 	private static final Long KEEP_ALIVE_SECS = 5L;
 	private static final RejectedExecutionHandler REJ_HANDLER = new ThreadPoolExecutor.AbortPolicy();
-	private static final int TERMINATION_TIMEOUT = 6;
+	private static final int TERMINATION_TIMEOUT_IN_SEC = 6;
+	private static final int TERMINATION_TIMEOUT_IN_MS = 6000;
 
 	@Spy
 	private HybrisAwareThreadPoolTaskExecutor executor = new HybrisAwareThreadPoolTaskExecutor();
@@ -69,7 +70,7 @@ public class HybrisAwareThreadPoolTaskExecutorTest
 		executor.setKeepAliveSeconds(KEEP_ALIVE_SECS.intValue());
 		executor.setRejectedExecutionHandler(REJ_HANDLER);
 		executor.setThreadFactory(THREAD_FACTORY);
-		executor.setAwaitTerminationSeconds(TERMINATION_TIMEOUT);
+		executor.setAwaitTerminationSeconds(TERMINATION_TIMEOUT_IN_SEC);
 
 		executor.afterPropertiesSet();
 
@@ -198,7 +199,7 @@ public class HybrisAwareThreadPoolTaskExecutorTest
 		executor.shutdown();
 
 		final ThreadPoolExecutor threadPoolExecutor = executor.getThreadPoolExecutor();
-		verify(threadPoolExecutor).awaitTermination(TERMINATION_TIMEOUT, TimeUnit.SECONDS);
+		verify(threadPoolExecutor).awaitTermination(TERMINATION_TIMEOUT_IN_MS, TimeUnit.MILLISECONDS);
 	}
 
 	@Test

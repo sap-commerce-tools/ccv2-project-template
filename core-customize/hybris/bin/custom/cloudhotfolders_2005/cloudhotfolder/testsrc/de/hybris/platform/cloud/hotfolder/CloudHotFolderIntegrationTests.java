@@ -272,7 +272,7 @@ public class CloudHotFolderIntegrationTests extends ExtendedServicelayerBaseTest
 		 * See {@link CoreDataImportService} for details of executed impex, their ordering and other optional impexes
 		 */
 		final List<Integer> indicesOfSuccessfulImportActions = Lists.newArrayList(1);  // essential-data.impex
-		final int expectedAttemptingToProcess = 14;
+		final int expectedAttemptingToProcess = 16;
 
 		assertThat(userService.isUserExisting(expectedUid)).isFalse();
 
