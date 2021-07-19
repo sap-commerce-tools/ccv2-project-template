@@ -6,7 +6,7 @@
 >    using the correct file name, e.g.
 >
 >    ```bash
->    cp ~/Downloads/CXCOMM201100P*.ZIP ./platform/hybris-commerce-suite-2011.6.zip
+>    cp ~/Downloads/CXCOMM201100P*.ZIP ./dependencies/hybris-commerce-suite-2011.6.zip
 >    ```
 >    *Or* configure your S-User (e.g. using `gradle.properties`) and run `./gradlew downloadAndVerifyPlatform`
 >    
