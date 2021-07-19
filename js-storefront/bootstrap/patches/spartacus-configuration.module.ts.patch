@@ -1,10 +1,8 @@
---- src/app/spartacus/spartacus-configuration.module.ts	2021-04-23 12:00:23.000000000 +0200
-+++ src/app/spartacus/spartacus-configuration.module.ts	2021-04-25 09:54:23.000000000 +0200
-@@ -1,18 +1,35 @@
- import { NgModule } from '@angular/core';
+--- src/app/spartacus/spartacus-configuration.module.ts	2021-07-16 09:54:00.000000000 +0200
++++ src/app/spartacus/spartacus-configuration.module.ts	2021-07-16 14:55:25.000000000 +0200
+@@ -2,18 +2,28 @@
  import { translationChunksConfig, translations } from "@spartacus/assets";
-+import { OccConfig } from '@spartacus/core';
- import { provideConfig } from "@spartacus/core";
+ import { FeaturesConfig, I18nConfig, OccConfig, provideConfig, SiteContextConfig } from "@spartacus/core";
  import { defaultCmsContentProviders, layoutConfig, mediaConfig } from "@spartacus/storefront";
 +import { environment } from 'src/environments/environment';
 +
@@ -13,7 +11,6 @@
 +// <meta name="occ-backend-base-url" > is ignored.
 +// This in turn breaks the deployment in CCv2.
 +// https://github.com/SAP/spartacus/issues/5886
-+occConfig.backend.occ.prefix = '/occ/v2/'
 +if (environment.occBaseUrl) {
 +  occConfig.backend.occ.baseUrl = environment.occBaseUrl;
 +}
@@ -22,19 +19,16 @@
    declarations: [],
    imports: [
    ],
-   providers: [provideConfig(layoutConfig), provideConfig(mediaConfig), ...defaultCmsContentProviders, provideConfig({
+   providers: [provideConfig(layoutConfig), provideConfig(mediaConfig), ...defaultCmsContentProviders, provideConfig(<OccConfig>{
 -    backend: {
 -      occ: {
 -      }
+-    },
 +    backend: occConfig.backend,
-+    smartEdit: {
-+      storefrontPreviewRoute: 'cx-preview',
-+      //TODO: adjust origins as necessary
-+      allowOrigin: 'localhost:9002, *.*.model-t.cc.commerce.ondemand.com:443',
-     },
+   }), provideConfig(<SiteContextConfig>{
      context: {
-+      urlParameters: ['baseSite', 'language', 'currency'],
-+      //TODO: configure baseSite
++      // TODO: adjust parameters and site
++      // urlParameters: ['baseSite', 'language', 'currency'],
 +      // baseSite: ['electronics-spa'],
        currency: ['USD'],
        language: ['en'],
