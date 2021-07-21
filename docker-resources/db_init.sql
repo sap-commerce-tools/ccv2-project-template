@@ -3,26 +3,34 @@ GO
 RECONFIGURE
 GO
 EXEC sp_configure 'cost threshold for parallelism', 50;
+EXEC sp_configure 'max degree of parallelism', 4;
+EXEC sp_configure 'contained database authentication', 1;
 GO
 RECONFIGURE
 GO
-EXEC sp_configure 'max degree of parallelism', 8;
+USE master;
 GO
-RECONFIGURE
+IF DB_ID (N'localdev') IS NULL
+BEGIN
+    CREATE DATABASE localdev CONTAINMENT = PARTIAL;
+    ALTER DATABASE localdev SET READ_COMMITTED_SNAPSHOT ON;
+    ALTER DATABASE localdev SET ALLOW_SNAPSHOT_ISOLATION ON;
+END
+ELSE
+BEGIN
+    PRINT N'DB localdev already exists';
+END
 GO
-exec sp_configure 'contained database authentication', 1;
-go
-reconfigure
-go
-create database localdev containment = partial;
-go
-ALTER DATABASE localdev SET READ_COMMITTED_SNAPSHOT ON
-go
-ALTER DATABASE localdev SET ALLOW_SNAPSHOT_ISOLATION ON
+USE localdev;
 GO
-USE localdev
+IF DATABASE_PRINCIPAL_ID(N'localdev') IS NULL
+BEGIN
+    CREATE USER localdev WITH PASSWORD = 'localdev1!';
+END
+ELSE
+BEGIN
+    PRINT N'user localdev already exists';
+END
 GO
-CREATE USER localdev
-WITH PASSWORD = 'localdev1!'
+EXEC sp_addrolemember 'db_owner', 'localdev';
 GO
-exec sp_addrolemember 'db_owner', 'localdev'

@@ -11,7 +11,7 @@ services:
   mssqlinit:
     image: "mcr.microsoft.com/mssql-tools"
     volumes: 
-      - resources_vol:/tmp/resources
+      - ./docker-resources:/tmp/resources
     command: bash -c "set -e; cd /tmp/resources && bash configure-db.sh"
     environment:
       - SQLSERVER=mssql
@@ -22,13 +22,3 @@ services:
     image: mcr.microsoft.com/azure-storage/azurite
     ports: 
       - 10000:10000
-    # volumes: 
-    #   - azurite-store:/data
-volumes:
-  resources_vol:
-    driver_opts:
-      type: none
-      device: ${PWD}/docker-resources
-      o: bind
-#   mssqldb-vol:
-#   azurite-store:
