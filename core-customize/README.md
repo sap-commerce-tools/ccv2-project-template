@@ -2,11 +2,11 @@
 
 > **Initial project bootstrap**
 >
-> 1. Download the latest SAP Commerce 2011 release zip file and put it into the `platform` folder
+> 1. Download the latest SAP Commerce 2011 release zip file and put it into the `dependencies` folder
 >    using the correct file name, e.g.
 >
 >    ```bash
->    cp ~/Downloads/CXCOMM201100P*.ZIP ./platform/hybris-commerce-suite-2011.6.zip
+>    cp ~/Downloads/CXCOMM201100P*.ZIP ./dependencies/hybris-commerce-suite-2011.6.zip
 >    ```
 >    *Or* configure your S-User (e.g. using `gradle.properties`) and run `./gradlew downloadAndVerifyPlatform`
 >    
