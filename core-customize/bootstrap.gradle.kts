@@ -67,7 +67,7 @@ tasks.register<HybrisAntTask>("generateOcc") {
     args("extgen")
     antProperty("input.template", "yocc")
     antProperty("input.name", "${inputName()}occ")
-    antProperty("input.package", "${inputPackage()}.occ.tests")
+    antProperty("input.package", "${inputPackage()}.occ")
 }
 
 // ant extgen -Dinput.template=yocc -Dinput.name=demoshopocc -Dinput.package=com.demo.shop.occ.tests
