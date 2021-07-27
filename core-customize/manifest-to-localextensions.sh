@@ -4,7 +4,7 @@
 
 # REQUIRES: jq - https://stedolan.github.io/jq/
 
-MANIFEST_FILE=$1
+MANIFEST_FILE=${1:-manifest.json}
 
 #get extension list
 echo ''
