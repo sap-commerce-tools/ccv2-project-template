@@ -60,7 +60,6 @@ tasks.register<Copy>("copyConfigImpex") {
     into("hybris/bin/custom/${inputName()}/${inputName()}storefront/resources/impex/")
 }
 
-// ant extgen -Dinput.template=yocc -Dinput.name=demoshopocc -Dinput.package=com.demo.shop.occ
 tasks.register<HybrisAntTask>("generateOcc") {
     dependsOn("bootstrapPlatform", "createDefaultConfig")
 
@@ -70,7 +69,6 @@ tasks.register<HybrisAntTask>("generateOcc") {
     antProperty("input.package", "${inputPackage()}.occ")
 }
 
-// ant extgen -Dinput.template=yocc -Dinput.name=demoshopocc -Dinput.package=com.demo.shop.occ.tests
 tasks.register<HybrisAntTask>("generateOccTests") {
     dependsOn("bootstrapPlatform", "createDefaultConfig")
 

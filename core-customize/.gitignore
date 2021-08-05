@@ -16,7 +16,7 @@ hybris/config/local-config/99-local.properties
 # only allow custom extension
 hybris/bin/*
 !hybris/bin/custom/
- 
+
 #IDE files
 .gradle
 .idea
@@ -31,6 +31,7 @@ org.springframework.ide.eclipse.core.prefs
 .springBeans
 
 # Filename patterns to ignore
+lib/.lastupdate
 *.class
 build.xml
 Generated*.java
