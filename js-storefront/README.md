@@ -12,9 +12,9 @@ You can delete the `bootstrap` folder and script afterwards.
 
 - Node.js 12.x
 - Yarn 1.15+
-- Angular CLI (`ng`) 10.1.x
+- Angular CLI (`ng`) 12.x
 
-(ref [Building the Spartacus Storefront Using 3.x Libraries][libraries])
+(ref [Building the Spartacus Storefront Using 4.x Libraries][libraries])
 
 [libraries]: https://sap.github.io/spartacus-docs/building-the-spartacus-storefront-from-libraries/#front-end-development-requirements
 
