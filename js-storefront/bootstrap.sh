@@ -24,7 +24,7 @@ if [ -z "$NAME" ]; then
     exit 1
 fi
 
-# https://sap.github.io/spartacus-docs/building-the-spartacus-storefront-from-libraries
+# https://sap.github.io/spartacus-docs/building-the-spartacus-storefront-from-libraries-4-x/
 # yarn global add @angular/cli@latest
 
 if ! command -v 'yarn' > /dev/null 2>&1
@@ -60,6 +60,7 @@ ng new "$NAME" \
     cd "$NAME" || exit 1
     progress "Adding Spartacus (PWA and SSR enabled)"
     echo "> Recommended minimal features: Cart, Product, SmartEdit"
+    echo "> Just confirm the empty defaults for SmartEdit preview route and allow origin"
     ng add @spartacus/schematics@latest \
       --pwa \
       --ssr \
@@ -106,6 +107,6 @@ EOF
 progress "FINISHED"
 echo "Next steps:"
 echo "- Update the baseSite.context with the correct baseSite, currency etc."
-echo "  https://sap.github.io/spartacus-docs/building-the-spartacus-storefront-from-libraries/#checking-appmodulets-for-base-url-and-other-settings"
+echo "  https://sap.github.io/spartacus-docs/building-the-spartacus-storefront-from-libraries-4-x/#checking-spartacus-configurationmodulets-for-base-url-and-other-settings"
 echo "- Update smartedit whitelisting in spartacus-configuration.module.ts"
-echo "  https://sap.github.io/spartacus-docs/smartEdit-setup-instructions-for-spartacus/#configuring-smartedit-to-work-with-spartacus-32-or-newer"
+echo "  https://sap.github.io/spartacus-docs/smartEdit-setup-instructions-for-spartacus/"

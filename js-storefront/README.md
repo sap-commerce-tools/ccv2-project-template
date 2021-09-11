@@ -10,20 +10,21 @@ You can delete the `bootstrap` folder and script afterwards.
 
 ## Requirements
 
-- Node.js 12.x
-- Yarn 1.15+
-- Angular CLI (`ng`) 12.x
+- [Angular CLI](https://angular.io/): **12.0** or later.
+- node.js: 14.x [1]
+- yarn: v1.15 or later
 
 (ref [Building the Spartacus Storefront Using 4.x Libraries][libraries])
 
-[libraries]: https://sap.github.io/spartacus-docs/building-the-spartacus-storefront-from-libraries/#front-end-development-requirements
+[1]: Node.js 12 is [EOL by 2022-04-30](https://nodejs.org/en/about/releases/)
+
+[libraries]: https://sap.github.io/spartacus-docs/building-the-spartacus-storefront-from-libraries-4-x/#front-end-development-requirements
 
 ## What does the script do?
 
 - Bootstraps a new Spartacus project from scratch as recommended by the official documentation (with PWA and SSR support)
 - Enable optimizations (patches in `bootstrap/patches`):
   - Configuration for "SAP Commerce in the Public Cloud" (aka CCv2) (including [Smartedit setup][smartedit])
-  - CCv2-compatible OCC settings (ref [SAP/spartacus#5886][issue])
   - Minor tweaks to `package.json`:
     - Run production build on `yarn build` (see [Updating the Code Repository for JavaScript Storefronts][build])
     - Use SSL for local development server (`yarn start`)
