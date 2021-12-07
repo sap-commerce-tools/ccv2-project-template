@@ -21,3 +21,9 @@
 ## Spartacus Setup
 
 [js-storefront/README.md](js-storefront/README.md)
+
+## Finalize Build Process
+
+- Update build.gradle.kts file to point to the correct paths.
+- Depending on the steps before, you might only need to redeclare the projectName variable.
+- If commerce backend and js-storefront use different names, you need to modify the paths accordingly.
