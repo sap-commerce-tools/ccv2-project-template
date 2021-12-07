@@ -45,8 +45,8 @@ ruleset.xml
 *.log
 .pmd
 *build.number
-
 base.properties
+
 #  Addon specific copy folders
 **/_ui/addons
 **/views/addons

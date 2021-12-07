@@ -1,0 +1,7 @@
+# Gradle Build Artefacts
+.gradle
+gradle.properties
+/build/
+
+# HybrisZips
+**/CXCOM*.ZIP
