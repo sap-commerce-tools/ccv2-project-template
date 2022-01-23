@@ -42,7 +42,7 @@ if (project.hasProperty("sUser") && project.hasProperty("sUserPass")) {
         dependsOn("downloadPlatform") 
         src(file("dependencies/hybris-commerce-suite-${COMMERCE_VERSION}.zip"))
         algorithm("SHA-256")
-        checksum(commerceSuiteChecksum)
+        checksum("${commerceSuiteChecksum}")
     }
 
     tasks.named("bootstrapPlatform") {
@@ -70,7 +70,7 @@ if (project.hasProperty("sUser") && project.hasProperty("sUserPass")) {
             dependsOn("downloadIntExtPack")
             src(file("${DEPENDENCY_FOLDER}/hybris-commerce-integrations-${INTEXTPACK_VERSION}.zip"))
             algorithm("SHA-256")
-            checksum(commerceIntegrationsChecksum)
+            checksum("${commerceIntegrationsChecksum}")
         }
 
         tasks.named("bootstrapPlatform") {
