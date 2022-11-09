@@ -8,6 +8,7 @@
 - [docker-compose](https://docs.docker.com/compose/)-based setup for:
   - MS SQL
   - [Azurite](https://github.com/Azure/Azurite) (for cloud hotfolder)
+  - DB import with [sqlpackage](https://learn.microsoft.com/es-es/sql/tools/sqlpackage/sqlpackage) (for bacpac imports from CCV2 to local environment)
 
 ## How To
 
