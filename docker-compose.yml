@@ -19,7 +19,7 @@ services:
     depends_on:
       - mssql
   mssqlimport:
-    image: "mcr.microsoft.com/mssql-tools"
+    build: ./docker-resources
     volumes: 
       - ./docker-resources:/tmp/resources
     command: bash -c "set -e; cd /tmp/resources && bash import-db.sh"

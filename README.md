@@ -8,7 +8,7 @@
 - [docker-compose](https://docs.docker.com/compose/)-based setup for:
   - MS SQL
   - [Azurite](https://github.com/Azure/Azurite) (for cloud hotfolder)
-  - DB snapshot import with [sqlpackage](https://learn.microsoft.com/es-es/sql/tools/sqlpackage/sqlpackage). Place your backup.bacpac file in `docker-resources` folder (for bacpac imports from CCV2 to local environment)
+  - DB snapshot import with [sqlpackage](https://learn.microsoft.com/es-es/sql/tools/sqlpackage/sqlpackage). Place your snapshot.bacpac file in `docker-resources` folder (for bacpac imports from CCV2 to local environment)
 
 ## How To
 
