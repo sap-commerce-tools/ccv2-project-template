@@ -104,7 +104,7 @@ mapOf(
         } else {
             // https://blogs.windows.com/windowsdeveloper/2016/12/02/symlinks-windows-10/
             val windowsPath = path.toString().replace("[/]".toRegex(), "\\")
-            commandLine("cmd", "/c", """mklink /d "${it.key}" "${windowsPath}" """)
+            commandLine("cmd", "/c", """mklink "${it.key}" "${windowsPath}" """)
         }
         workingDir(localConfig)
         dependsOn("generateLocalProperties")
