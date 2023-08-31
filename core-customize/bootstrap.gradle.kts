@@ -1,6 +1,6 @@
 plugins {
-    id("sap.commerce.build") version("3.5.0")
-    id("sap.commerce.build.ccv2") version("3.5.0")
+    id("sap.commerce.build") version("4.0.0")
+    id("sap.commerce.build.ccv2") version("4.0.0")
 }
 
 buildscript {

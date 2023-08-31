@@ -63,7 +63,7 @@ local smartEditWebapps = [
 
 // ------------ MANIFEST ------------
 function(intExtPackVersion=null, solrVersion=null, solrCustom='solr') {
-  commerceSuiteVersion: '2011.9',
+  commerceSuiteVersion: '2211',
   useCloudExtensionPack: false,
   extensionPacks: [
   ] + if intExtPackVersion != null then [
