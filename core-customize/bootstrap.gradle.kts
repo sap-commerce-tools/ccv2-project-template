@@ -28,6 +28,7 @@ fun inputName(): String {
     } 
     return (project.property("projectName") as String)
 }
+
 fun inputPackage(): String {
     if (!(project.hasProperty("projectName") && project.hasProperty("rootPackage"))) {
         logger.error("Please provide the projectName and rootPacakge")
@@ -54,7 +55,7 @@ tasks.register<HybrisAntTask>("generateNewStorefront") {
 }
 
 tasks.register<Copy>("copyConfigImpex") {
-    mustRunAfter("generateNewStorefront")
+    mustRunAfter("generateNewStorefront", "filterJsonnet")
     from("bootstrap/")
     include("*.impex")
     into("hybris/bin/custom/${inputName()}/${inputName()}storefront/resources/impex/")
@@ -95,12 +96,14 @@ tasks.register<Copy>("mergeConfigFolder") {
     into("hybris/config")
     filter(org.apache.tools.ant.filters.ReplaceTokens::class, "tokens" to mapOf("projectName" to inputName()))
 }
+
 tasks.register<Copy>("filterJsonnet") {
     from("bootstrap/manifest.jsonnet")
     into("bootstrap")
     rename(".*", "manifest.jsonnet.filtered")
     filter(org.apache.tools.ant.filters.ReplaceTokens::class, "tokens" to mapOf("projectName" to inputName()))
 }
+
 tasks.register("moveJsonnet") {
     dependsOn("filterJsonnet")
     doLast {
@@ -109,6 +112,7 @@ tasks.register("moveJsonnet") {
         }
     }
 }
+
 tasks.register("enableIntExtPack") {
     mustRunAfter("moveJsonnet")
     onlyIf {
@@ -124,6 +128,7 @@ tasks.register("enableIntExtPack") {
         }
     }
 }
+
 fun generateManifest() {
     sjsonnet.SjsonnetMain.main0(
             arrayOf("--output-file", "manifest.json", "manifest.jsonnet"),
@@ -136,6 +141,7 @@ fun generateManifest() {
             scala.`None$`.empty()
         )
 }
+
 tasks.register("generateManifest") {
     dependsOn("moveJsonnet", "enableIntExtPack")
     doLast {
@@ -217,16 +223,20 @@ tasks.register("enableSolrCustomization") {
     group = "Bootstrap"
     description = "Prepare Solr configuration for both local development and customization"
 }
+
 tasks.register<HybrisAntTask>("startSolr") {
     args("startSolrServers")
 }
+
 tasks.register<HybrisAntTask>("stopSolr") {
     args("stopSolrServers")
     mustRunAfter("startSolr")
 }
+
 tasks.register("startStopSolr") {
     dependsOn("startSolr", "stopSolr")
 }
+
 tasks.register("moveSolrConfig") {
     dependsOn("startStopSolr")
     doLast {
@@ -236,6 +246,7 @@ tasks.register("moveSolrConfig") {
         }
     }
 }
+
 tasks.register<Exec>("symlinkSolrConfig") {
     dependsOn("moveSolrConfig")
      if (Os.isFamily(Os.FAMILY_UNIX)) {
@@ -261,6 +272,7 @@ tasks.register("findSolrVersion") {
         extra.set("bundledSolrVersion", props.get("version"))
     }
 }
+
 tasks.register("manifestWithSolr") {
     mustRunAfter("symlinkSolrConfig")
     dependsOn("findSolrVersion")
