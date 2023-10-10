@@ -26,7 +26,6 @@ local webapp(extension, path=null) = {
 
 // CONFIGURE YOUR MANIFEST HERE
 
-local storefrontExtension = '@projectName@storefront';
 local storefrontContextRoot = '';
 local storefrontAddons = [
   'smarteditaddon',
@@ -62,7 +61,7 @@ local smartEditWebapps = [
 ];
 
 // ------------ MANIFEST ------------
-function(intExtPackVersion=null, solrVersion=null, solrCustom='solr', accStorefrontEnabled=false) {
+function(intExtPackVersion=null, solrVersion=null, solrCustom='solr', accStorefrontEnabled=false, storefrontExtension=null) {
   commerceSuiteVersion: '2211',
   useCloudExtensionPack: false,
   extensionPacks: [
