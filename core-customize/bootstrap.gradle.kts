@@ -108,6 +108,7 @@ if (accStorefrontEnabled) {
 //** setup hybris/config folder
 tasks.register<Copy>("mergeConfigFolder") {
     dependsOn("generateCode")
+    mustRunAfter("copyJsonnet")
     from("bootstrap/config-template")
     into("hybris/config")
     filter(org.apache.tools.ant.filters.ReplaceTokens::class, "tokens" to mapOf("projectName" to inputName()))
