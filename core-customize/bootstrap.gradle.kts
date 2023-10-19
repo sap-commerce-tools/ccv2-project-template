@@ -55,18 +55,18 @@ tasks.register<HybrisAntTask>("generateAcceleratorModule") {
     antProperty("input.package", inputPackage())
 }
 
-val accStorefrontEnabled = project.hasProperty("accStorefrontEnabled") && (project.property("accStorefrontEnabled") as Boolean)
+val accStorefrontEnabled = project.hasProperty("accStorefrontEnabled") && (project.property("accStorefrontEnabled") == "true")
 
 if (accStorefrontEnabled) {
     tasks.register<Copy>("copyConfigImpex") {
-        dependsOn("generateAcceleratorModule")
+        dependsOn("generateAcceleratorModule", "copyJsonnet")
         from("bootstrap/")
         include("*.impex")
         into("hybris/bin/custom/${inputName()}/${inputName()}storefront/resources/impex/")
     }
 } else {
     tasks.register<Delete>("deleteAcceleratorStorefrontExtension") {
-        mustRunAfter("generateAcceleratorModule")
+        dependsOn("generateAcceleratorModule")
         delete("hybris/bin/custom/${inputName()}/${inputName()}storefront/")
     }
 }
@@ -101,7 +101,11 @@ tasks.register("generateCode") {
 
 if (accStorefrontEnabled) {
     tasks.named("generateCode") {
-        mustRunAfter("copyConfigImpex")
+        dependsOn("copyConfigImpex")
+    }
+} else {
+    tasks.named("generateCode") {
+        dependsOn("deleteAcceleratorStorefrontExtension")
     }
 }
 
@@ -112,6 +116,9 @@ tasks.register<Copy>("mergeConfigFolder") {
     from("bootstrap/config-template")
     into("hybris/config")
     filter(org.apache.tools.ant.filters.ReplaceTokens::class, "tokens" to mapOf("projectName" to inputName()))
+    if (!accStorefrontEnabled) {
+        filter { line -> line.replace(Regex("^.*${inputName()}storefront.*$"), "") }
+    }
 }
 
 tasks.register<Copy>("copyJsonnet") {

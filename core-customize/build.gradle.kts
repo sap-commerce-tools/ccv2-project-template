@@ -18,6 +18,29 @@ repositories {
     mavenCentral()
 }
 
+hybris {
+    //Optional mapping of preview version to patch level.
+    // manifest.json requires the Commerce Suite version in the format 2211.8, while the platform build.number
+    // uses 2211.FP1. This mapping allows the plugin to convert between the two formats.
+    previewToPatchLevel = mapOf<String, Int>(
+            "2211.FP0" to 4,
+            "2211.FP1" to 8
+    )
+
+    //Control the sparse platform bootstrap.
+    //  When enabled, the commerce extensions are extracted from the distribution zip on a as-needed basis.
+    //  Only extensions that are actually used in the project (either directly listed in the localextensions.xml or
+    //  required by other extensions) are extracted.
+    //  The platform itself is always extracted.
+    //  When this mode is enabled, the bootstrapInclude configuration property is ignored.
+    sparseBootstrap {
+        // default is disabled
+        enabled = true
+        // set of extensions that are always extracted, default is an empty set
+        alwaysIncluded = listOf<String>()
+    }
+}
+
 //Optional: automate downloads from launchpad.support.sap.com
 //  remove this block if you use something better, like Maven
 //  Recommended reading: 
