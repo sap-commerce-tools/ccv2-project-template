@@ -135,8 +135,6 @@ fun generateManifest() {
         arrayOf("--ext-str", "storefrontExtension=${inputName()}storefront", "--ext-code", "accStorefrontEnabled=true")
     } else arrayOf()
 
-    println("jsonnet manifest params: ${accStorefrontParams + intExtJsonnetParams + arrayOf("--output-file", "manifest.json", "manifest.jsonnet")}")
-
     sjsonnet.SjsonnetMain.main0(
             accStorefrontParams + intExtJsonnetParams + arrayOf("--output-file", "manifest.json", "manifest.jsonnet"),
             sjsonnet.SjsonnetMain.createParseCache(),
