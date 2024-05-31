@@ -1,8 +1,10 @@
 plugins {
     id("sap.commerce.build") version("4.0.0")
     id("sap.commerce.build.ccv2") version("4.0.0")
-    id("de.undercouch.download") version("5.5.0")
+    id("de.undercouch.download") version("5.5.0") // for downloading solr-9.x.tgz and optionally SAP Commerce Cloud zips.
+    `maven-publish` // for publishing to the local maven repo
 }
+
 import mpern.sap.commerce.build.tasks.HybrisAntTask
 import org.apache.tools.ant.taskdefs.condition.Os
 
@@ -12,11 +14,37 @@ import de.undercouch.gradle.tasks.download.Verify
 import java.time.Instant
 import java.util.Base64
 
+val solrVersionMap = mapOf( //
+    /*
+     * version 8 unfortunately has a different download URL and is currently not working. But it is the version that is
+     * supplied with the standard zip, so we're fine unless the solr version is changed and then changed back in
+     * manifest.json
+     */
+    "8.11" to "8.11.2", //
+    "9.2" to "9.2.1", //
+    "9.5" to "9.5.0"
+)
+val solrVersion = solrVersionMap[CCV2.manifest.solrVersion]!!
+
 val dependencyFolder = "dependencies"
+
 repositories {
     flatDir { dirs(dependencyFolder) }
     mavenCentral()
 }
+
+wrapper {
+
+}
+
+val cloudHotfolderExtensions: Configuration by configurations.creating
+val solrServer: Configuration by configurations.creating
+
+dependencies {
+    cloudHotfolderExtensions("de.hybris.platform:cloudhotfolders:${cloudHotfolderVersion}@zip")
+    solrServer("org.apache.solr:solr:${solrVersion}")
+}
+
 
 hybris {
     //Optional mapping of preview version to patch level.
@@ -39,6 +67,61 @@ hybris {
         // set of extensions that are always extracted, default is an empty set
         alwaysIncluded = listOf<String>()
     }
+}
+
+/*
+ * Cloud hotfolders are transparently provided in commerce cloud. Since some of extensions might depend on them, we
+ * also have them locally.
+ */
+tasks.register<Copy>("bootstrapCloudhotfolder") {
+    group = "build setup"
+    dependsOn("bootstrapPlatform")
+    onlyIf {
+        !file("${binDir}/cloudhotfolders").exists()
+    }
+
+    from(zipTree(cloudHotfolderExtensions.singleFile))
+    into("${binDir}/cloudhotfolders")
+}
+
+tasks.register<Download>("fetchSolr") {
+    src(uri("https://archive.apache.org/dist/solr/solr/${solrVersion}/solr-${solrVersion}.tgz"))
+    dest("${dependencyFolder}/solr-${solrVersion}.tgz")
+    overwrite(false) // to only download solr into the dependency folder if it's not there yet.
+}
+
+val repackSolr = tasks.register<Zip>("repackSolr") {
+    dependsOn("fetchSolr")
+    from(tarTree("${dependencyFolder}/solr-${solrVersion}.tgz"))
+    archiveFileName = "solr-${solrVersion}.zip"
+    destinationDirectory = file(dependencyFolder)
+}
+
+publishing {
+    publications {
+        create<MavenPublication>("solr") {
+            groupId = "org.apache.solr"
+            artifactId = "solr"
+            version = solrVersion
+
+            artifact(repackSolr.get().archiveFile)
+        }
+    }
+}
+
+tasks.named("yinstallSolr") {
+    // this task is available because of the solr-publication above.
+    dependsOn("publishSolrPublicationToMavenLocal")
+}
+
+tasks.ybuild {
+    dependsOn("publishSolrPublicationToMavenLocal")
+    group = "build"
+}
+
+tasks.wrapper {
+    distributionType = Wrapper.DistributionType.ALL
+    gradleVersion = "8.7"
 }
 
 //Optional: automate downloads from launchpad.support.sap.com
@@ -160,5 +243,12 @@ tasks.named("installManifestAddons") {
 tasks.register("setupLocalDevelopment") {
     group = "SAP Commerce"
     description = "Setup local development"
-    dependsOn("bootstrapPlatform", "generateLocalDeveloperProperties", "installManifestAddons", "enableModeltMock")
+    dependsOn(
+        "bootstrapPlatform",
+        "bootstrapCloudhotfolder",
+        "yinstallSolr"
+        "generateLocalDeveloperProperties",
+        "installManifestAddons",
+        "enableModeltMock"
+    )
 }
