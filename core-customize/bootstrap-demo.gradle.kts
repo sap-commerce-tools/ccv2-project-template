@@ -44,7 +44,7 @@ tasks.register("fixcmsflexcomponent") {
     }
 }
 tasks.register<de.undercouch.gradle.tasks.download.Download>("downloadSpartacusSampleData") {
-    src("https://github.com/SAP/spartacus/releases/download/storefront-3.4.1/spartacussampledata.2011.zip")
+    src("https://github.com/SAP-samples/cloud-commerce-sample-setup/releases/download/sampledata/spartacussampledata-version-2211-x.zip")
     dest("dependencies")
     onlyIfModified(true)
     useETag(true)
