@@ -24,17 +24,17 @@ val solrVersionMap = mapOf( //
     "9.2" to "9.2.1", //
     "9.5" to "9.5.0"
 )
-val solrVersion = solrVersionMap[CCV2.manifest.solrVersion]!!
+val solrVersion = solrVersionMap[CCV2.manifest.solrVersion] ?: "9.2.1"
 
-val dependencyFolder = "dependencies"
+val cloudHotfolderVersion = "2211"
+
+val dependencyDir = "dependencies"
+val workingDir = project.projectDir
+val binDir = "${workingDir}/hybris/bin"
 
 repositories {
-    flatDir { dirs(dependencyFolder) }
+    flatDir { dirs(dependencyDir) }
     mavenCentral()
-}
-
-wrapper {
-
 }
 
 val cloudHotfolderExtensions: Configuration by configurations.creating
@@ -55,6 +55,28 @@ hybris {
             "2211.FP1" to 8
     )
 
+    // what files should be deleted when cleaning up the platform?
+    // (cloudhofolders will be downloaded by custom configuration)
+    cleanGlob.set("glob:**hybris/bin/{modules**,platform**,cloudhotfolders**}")
+
+    // what should be unpacked from the platform zip files?
+    bootstrapInclude.set(
+        listOf(
+            "hybris/**", //
+            "azurecloudhotfolder/**", //
+            "cloudcommons/**", //
+            "cloudhotfolder/**" //
+        )
+    )
+
+    // what should excluded when unpacking?
+    // the default value is a npm package folder that includes UTF-8 filenames, which lead to problems on linux
+    bootstrapExclude.set(
+        listOf(
+            "hybris/bin/ext-content/npmancillary/resources/npm/node_modules/http-server/node_modules/ecstatic/test/**"
+        )
+    )
+
     //Control the sparse platform bootstrap.
     //  When enabled, the commerce extensions are extracted from the distribution zip on a as-needed basis.
     //  Only extensions that are actually used in the project (either directly listed in the localextensions.xml or
@@ -63,7 +85,8 @@ hybris {
     //  When this mode is enabled, the bootstrapInclude configuration property is ignored.
     sparseBootstrap {
         // default is disabled
-        enabled = true
+        // currently not working in combination with the separate cloudhotfolders zip.
+        enabled = false
         // set of extensions that are always extracted, default is an empty set
         alwaysIncluded = listOf<String>()
     }
@@ -86,15 +109,15 @@ tasks.register<Copy>("bootstrapCloudhotfolder") {
 
 tasks.register<Download>("fetchSolr") {
     src(uri("https://archive.apache.org/dist/solr/solr/${solrVersion}/solr-${solrVersion}.tgz"))
-    dest("${dependencyFolder}/solr-${solrVersion}.tgz")
+    dest("${dependencyDir}/solr-${solrVersion}.tgz")
     overwrite(false) // to only download solr into the dependency folder if it's not there yet.
 }
 
 val repackSolr = tasks.register<Zip>("repackSolr") {
     dependsOn("fetchSolr")
-    from(tarTree("${dependencyFolder}/solr-${solrVersion}.tgz"))
+    from(tarTree("${dependencyDir}/solr-${solrVersion}.tgz"))
     archiveFileName = "solr-${solrVersion}.zip"
-    destinationDirectory = file(dependencyFolder)
+    destinationDirectory = file(dependencyDir)
 }
 
 publishing {
@@ -139,7 +162,7 @@ if (project.hasProperty("sUser") && project.hasProperty("sUserPass")) {
     
     tasks.register<Download>("downloadPlatform") {
         src(commerceSuiteDownloadUrl)
-        dest(file("${dependencyFolder}/hybris-commerce-suite-${commerceVersion}.zip"))
+        dest(file("${dependencyDir}/hybris-commerce-suite-${commerceVersion}.zip"))
         header("Authorization", "Basic $authorization")
         overwrite(false)
         tempAndMove(true)
@@ -149,7 +172,7 @@ if (project.hasProperty("sUser") && project.hasProperty("sUserPass")) {
 
     tasks.register<Verify>("downloadAndVerifyPlatform") {
         dependsOn("downloadPlatform") 
-        src(file("${dependencyFolder}/hybris-commerce-suite-${commerceVersion}.zip"))
+        src(file("${dependencyDir}/hybris-commerce-suite-${commerceVersion}.zip"))
         algorithm("SHA-256")
         checksum("$commerceSuiteChecksum")
     }
@@ -166,7 +189,7 @@ if (project.hasProperty("sUser") && project.hasProperty("sUserPass")) {
         
         tasks.register<Download>("downloadIntExtPack") {
             src(commerceIntegrationsDownloadUrl)
-            dest(file("${dependencyFolder}/hybris-commerce-integrations-${integrationExtensionPackVersion}.zip"))
+            dest(file("${dependencyDir}/hybris-commerce-integrations-${integrationExtensionPackVersion}.zip"))
             header("Authorization", "Basic $authorization")
             overwrite(false)
             tempAndMove(true)
@@ -176,7 +199,7 @@ if (project.hasProperty("sUser") && project.hasProperty("sUserPass")) {
 
         tasks.register<Verify>("downloadAndVerifyIntExtPack") {
             dependsOn("downloadIntExtPack")
-            src(file("${dependencyFolder}/hybris-commerce-integrations-${integrationExtensionPackVersion}.zip"))
+            src(file("${dependencyDir}/hybris-commerce-integrations-${integrationExtensionPackVersion}.zip"))
             algorithm("SHA-256")
             checksum("$commerceIntegrationsChecksum")
         }
@@ -246,7 +269,7 @@ tasks.register("setupLocalDevelopment") {
     dependsOn(
         "bootstrapPlatform",
         "bootstrapCloudhotfolder",
-        "yinstallSolr"
+        "yinstallSolr",
         "generateLocalDeveloperProperties",
         "installManifestAddons",
         "enableModeltMock"

@@ -17,6 +17,7 @@
 >      -PprojectName=<name, e.g. coolshop> \
 >      -ProotPackage=<package, e.g. com.cool.shop> \
 >      -PintExtPackVersion=2102.1    # (optional) enable "SAP Commerce Cloud, Integration Extension Pack"
+>      -PsolrVersion=9.2 # (optional) set the solr version for the manifest - o
 >    ```
 >
 >    Read the output!

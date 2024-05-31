@@ -135,8 +135,12 @@ fun generateManifest() {
         arrayOf("--ext-str", "storefrontExtension=${inputName()}storefront", "--ext-code", "accStorefrontEnabled=true")
     } else arrayOf()
 
+    val solrVersionParams = if (project.hasProperty("solrVersion")) {
+        arrayOf("--ext-str", "solrVersion='${project.property("solrVersion")}'")
+    } else arrayOf()
+
     sjsonnet.SjsonnetMain.main0(
-            accStorefrontParams + intExtJsonnetParams + arrayOf("--output-file", "manifest.json", "manifest.jsonnet"),
+            accStorefrontParams + intExtJsonnetParams + solrVersionParams + arrayOf("--output-file", "manifest.json", "manifest.jsonnet"),
             sjsonnet.SjsonnetMain.createParseCache(),
             java.lang.System.`in`,
             java.lang.System.`out`,
