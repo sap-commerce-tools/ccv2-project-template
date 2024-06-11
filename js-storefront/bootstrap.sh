@@ -38,30 +38,42 @@ fi
 if ! command -v 'ng' > /dev/null 2>&1
 then
     error "Angular CLI (ng) not found"
-    error "please install @angular/cli@latest"
-    error "> yarn global add @angular/cli@latest"
+    error "please install @angular/cli@17"
+    error "> yarn global add @angular/cli@17"
     exit 1
 fi
 
 NG_VERSION="$(ng version | grep '@angular-devkit/core' | awk '{ print $2 }')"
-if case $NG_VERSION in 12.*) false;; *) true;; esac; then
-    error "Wrong angular version, please use Angular 12 (latest) (@angular/cli@latest)"
+if case $NG_VERSION in 17.*) false;; *) true;; esac; then
+    error "Wrong angular version, please use Angular 17 (@angular/cli@latest)"
     exit 1
 fi
+
+echo "> Please visit https://ui.repositories.cloud.sap/www/webapp/users and copy your base64 credentials."
+echo "> (create a user if needed)"
+read -p "Enter base64: " npmcredentials
 
 progress "Bootstrapping Angular project '$NAME'"
 ng new "$NAME" \
   --skip-install \
   --skip-git \
   --style=scss \
+  --standalone=false \
   --routing=false \
-  --packageManager=yarn
+  --package-manager=yarn
 (
     cd "$NAME" || exit 1
+
+cat > .npmrc <<-EOF
+@spartacus:registry=https://73554900100900004337.npmsrv.base.repositories.cloud.sap/
+//73554900100900004337.npmsrv.base.repositories.cloud.sap/:_auth=$npmcredentials
+always-auth=true
+EOF
+
     progress "Adding Spartacus (PWA and SSR enabled)"
     echo "> Recommended minimal features: Cart, Product, SmartEdit"
     echo "> Just confirm the empty defaults for SmartEdit preview route and allow origin"
-    ng add @spartacus/schematics@latest \
+    ng add @spartacus/schematics@2211.23 \
       --pwa \
       --ssr \
       --use-meta-tags
@@ -101,7 +113,7 @@ cat > manifest.json <<-EOF
             }
         }
     ],
-    "nodeVersion": "12"
+    "nodeVersion": "20"
 }
 EOF
 progress "FINISHED"
