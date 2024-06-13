@@ -80,16 +80,6 @@ EOF
     progress "Applying optimizations"
     cp -r "../bootstrap/.vscode" .
     angular="$(grep -i '@angular/animations' package.json | awk '{ print $2 }')"
-    mkdir -p "patches"
-    for template in ../bootstrap/patches/*.patch; do
-        output="patches/$(basename "$template")"
-        sed "s/@NAME@/$NAME/g" "$template" > "$output.1"
-        sed "s/@ANGULAR@/$angular/g" "$output.1" > "$output"
-        rm "$output.1"
-    done
-    for patch in patches/*.patch; do
-        patch -p0 < "$patch" || true
-    done
     yarn install
 )
 progress "Generating Manifest"
