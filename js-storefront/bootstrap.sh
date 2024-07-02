@@ -49,10 +49,6 @@ if case $NG_VERSION in 17.*) false;; *) true;; esac; then
     exit 1
 fi
 
-echo "> Please visit https://ui.repositories.cloud.sap/www/webapp/users and copy your base64 credentials."
-echo "> (create a user if needed)"
-read -p "Enter base64: " npmcredentials
-
 progress "Bootstrapping Angular project '$NAME'"
 ng new "$NAME" \
   --skip-install \
@@ -66,7 +62,7 @@ ng new "$NAME" \
 
 cat > .npmrc <<-EOF
 @spartacus:registry=https://73554900100900004337.npmsrv.base.repositories.cloud.sap/
-//73554900100900004337.npmsrv.base.repositories.cloud.sap/:_auth=$npmcredentials
+//73554900100900004337.npmsrv.base.repositories.cloud.sap/:_auth=\${RBSC_NPM_CREDENTIALS}
 always-auth=true
 EOF
 
@@ -100,7 +96,10 @@ cat > manifest.json <<-EOF
             },
             "csr": {
                 "webroot": "dist/$NAME/browser/"
-            }
+            },
+            "enabledRepositories": [
+                "spartacus-6"
+            ]
         }
     ],
     "nodeVersion": "20"

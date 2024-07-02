@@ -1,41 +1,38 @@
 # JS Storefront Template
 
-To bootstrap a new Spartacus storefront, run:
-
-```bash
-./boostrap.sh <project name>
-```
-
-You can delete the `bootstrap` folder and script afterwards.
-
 ## Requirements
 
-- [Angular CLI](https://angular.io/): **12.0** or later.
-- node.js: 14.x [1]
-- yarn: v1.15 or later
+See [Recommended Development Environment][requirements].
 
-(ref [Building the Spartacus Storefront Using 4.x Libraries][libraries])
+- [Angular CLI](https://angular.io/): **17.0** or later.
+- node.js: 20.9.0 or later
+- yarn
 
-[1]: Node.js 12 is [EOL by 2022-04-30](https://nodejs.org/en/about/releases/)
+[requirements]: https://help.sap.com/docs/SAP_COMMERCE_COMPOSABLE_STOREFRONT/cfcf687ce2544bba9799aa6c8314ecd0/bf31098d779f4bdebb7a2d0591917363.html?locale=en-US
 
-[libraries]: https://sap.github.io/spartacus-docs/building-the-spartacus-storefront-from-libraries-4-x/#front-end-development-requirements
+## Getting started
+
+To bootstrap a new Spartacus storefront:
+
+1. Get credentials at the [Repository based shipment channel][rbsc]
+2. Export your base64 NPM credentials as Environment variable `RBSC_NPM_CREDENTIALS`.
+3. Run the bootstrap script with your repo name
+   ```bash
+   ./boostrap.sh <project name>
+   ```
+4. You can delete the `bootstrap` folder and script afterwards.
+
+[rbsc]: https://ui.repositories.cloud.sap/www/webapp/users/
 
 ## What does the script do?
 
 - Bootstraps a new Spartacus project from scratch as recommended by the official documentation (with PWA and SSR support)
-- Enable optimizations (patches in `bootstrap/patches`):
-  - Configuration for "SAP Commerce in the Public Cloud" (aka CCv2) (including [Smartedit setup][smartedit])
-  - Minor tweaks to `package.json`:
-    - Run production build on `yarn build` (see [Updating the Code Repository for JavaScript Storefronts][build])
-    - Use SSL for local development server (`yarn start`)
-    - Disable certificate checks for SSR development server (makes connection to local SAP Commerce development server possible)
-  - [Recommended developer settings][developer] for [VS Code][code]
 - Generate a `manifest.json` for CCv2 with correct settings for [Client Side][csr] and [Server Side Rendering][ssr]
+- Generate a `.npmrc` for configuration as described in [Installing Composable Storefront Libraries from the Repository
+  Based Shipment Channel][library] with a variable placeholder.
 
-[developer]: https://sap.github.io/cloud-commerce-spartacus-storefront-docs/recommended-development-environment/
-[code]: https://code.visualstudio.com/
+[library]: https://help.sap.com/docs/SAP_COMMERCE_COMPOSABLE_STOREFRONT/cfcf687ce2544bba9799aa6c8314ecd0/5de67850bd8d487181fef9c9ba59a31d.html?locale=en-US#installing-composable%0Astorefront-libraries-from-the-repository-based-shipment-channel
 [build]: https://help.sap.com/viewer/b2f400d4c0414461a4bb7e115dccd779/LATEST/en-US/63577f67a67347bf9f4765a5385ead33.html
-[smartedit]: https://sap.github.io/cloud-commerce-spartacus-storefront-docs/smartEdit-setup-instructions-for-spartacus/
 [issue]: https://github.com/SAP/spartacus/issues/5886
 
 [ssr]: https://help.sap.com/viewer/b2f400d4c0414461a4bb7e115dccd779/LATEST/en-US/cd5b94c25a68456ba5840f942f33f68b.html
