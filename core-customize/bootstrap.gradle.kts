@@ -19,6 +19,9 @@ repositories {
     mavenCentral()
 }
 
+val azureCloudExtensionsDisabled = project.hasProperty("azureCloudExtensionsDisabled") && (project.property("azureCloudExtensionsDisabled") == "true")
+val accStorefrontEnabled = project.hasProperty("accStorefrontEnabled") && (project.property("accStorefrontEnabled") == "true")
+
 fun inputName(): String {
     if (!(project.hasProperty("projectName") && project.hasProperty("rootPackage"))) {
         logger.error("Please provide the projectName and rootPacakge")
@@ -43,7 +46,6 @@ tasks.named("createDefaultConfig") {
     dependsOn("bootstrapExtras")
 }
 
-
 //** generate code
 // ant modulegen -Dinput.module=accelerator -Dinput.name=demoshop -Dinput.package=com.demo.shop
 tasks.register<HybrisAntTask>("generateAcceleratorModule") {
@@ -54,8 +56,6 @@ tasks.register<HybrisAntTask>("generateAcceleratorModule") {
     antProperty("input.name", inputName())
     antProperty("input.package", inputPackage())
 }
-
-val accStorefrontEnabled = project.hasProperty("accStorefrontEnabled") && (project.property("accStorefrontEnabled") == "true")
 
 if (accStorefrontEnabled) {
     tasks.register<Copy>("copyConfigImpex") {
@@ -118,6 +118,9 @@ tasks.register<Copy>("mergeConfigFolder") {
     filter(org.apache.tools.ant.filters.ReplaceTokens::class, "tokens" to mapOf("projectName" to inputName()))
     if (!accStorefrontEnabled) {
         filter { line -> line.replace(Regex("^.*${inputName()}storefront.*$"), "") }
+    }
+    if (azureCloudExtensionsDisabled) {
+        filter { line -> line.replace(Regex("^.*azurecloudhotfolder.*$"), "") }
     }
 }
 
