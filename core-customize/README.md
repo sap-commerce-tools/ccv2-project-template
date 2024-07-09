@@ -2,15 +2,18 @@
 
 > **Initial project bootstrap**
 >
-> 1. Download the latest SAP Commerce 2011 release zip file and put it into the `dependencies` folder
+> 1. Download the latest SAP Commerce 2211 release zip file and put it into the `dependencies` folder
 >    using the correct file name, e.g.
 >
 >    ```bash
->    cp ~/Downloads/CXCOMM201100P*.ZIP ./dependencies/hybris-commerce-suite-2011.6.zip
+>    cp ~/Downloads/CXCOMCL221100U_23*.ZIP ./dependencies/hybris-commerce-suite-2211.23.zip
 >    ```
 >    *Or* configure your S-User (e.g. using `gradle.properties`) and run `./gradlew downloadAndVerifyPlatform`
->    
-> 2. Bootstrap the starting point for your Commerce project by running the following command:
+> 2. Repeat the same for Integration extension pack if you want to use it.
+> 3. Download the [cloudhotfolders ZIP] into the `dependencies` folder (save as `cloudhotfolders-2211.zip`). If you
+>    don't need cloudhotfolders locally you can also remove them from the `build.gradle.kts` and the generated
+>    `localextensions.xml` after the next step.
+> 4. Bootstrap the starting point for your Commerce project by running the following command:
 >
 >    ```bash
 >    ./gradlew -b bootstrap.gradle.kts \
@@ -22,27 +25,28 @@
 >    The following optional settings are available:
 >       - `-PintExtPackVersion=2102.1` enable "SAP Commerce Cloud, Integration Extension Pack" with version.
 >       - `-PsolrVersion=9.2` set the solr version for the manifest. To check which versions are supported, see
->         Third-Party compatibility of the [Update Release Notes][update] of your selected version. 
->       - `-PazureCloudExtensionsDisabled=true` disable the dependency on azureCloudExtensions.
+>         Third-Party compatibility of the [Update Release Notes][update] of your selected version.
 >       - `-PaccStorefrontEnabled` enable code generation for the deprecated accelerator storefront.
 >
-> 3. Review the generated configuration in `hybris/config`, especially the `hybris/config/environment/*.properties`
+> 5. Review the generated configuration in `hybris/config`, especially the `hybris/config/environment/*.properties`
 >    files and `localextensions.xml` (search for `TODO:` comments)
-> 4. Update the `manifest.jsonnet` (again, search for `TODO:` comments).\
+> 6. Update the `manifest.jsonnet` (again, search for `TODO:` comments).\
 >    You can use the [jsonnet] file to update the `manifest.json` for your project.
-> 5. Delete all bootstrap files, you don't need them any more:
+> 7. Delete all bootstrap files, you don't need them any more:
 >
 >    ```bash
 >    rm -r bootstrap*
 >    ```
 >
-> 6. Delete this quote and the demo-section at the bottom of this README
-> 7. Commit and push the changes to your project repository :)
+> 8. Delete this quote and the demo-section at the bottom of this README
+> 9. Commit and push the changes to your project repository :)
+
+[update]: https://help.sap.com/docs/SAP_COMMERCE_CLOUD_PUBLIC_CLOUD/75d4c3895cb346008545900bffe851ce/f18f6a711d07462b80137df6ed533eee.html?locale=en-US&q=Compatibility%20Matrix
+[cloudhotfolders ZIP]: https://me.sap.com/notes/2817992
 
 We use Gradle + [commerce-gradle-plugin][plugin] to automate whole project setup.
 
 [plugin]: https://github.com/SAP/commerce-gradle-plugin
-[update]: https://help.sap.com/docs/SAP_COMMERCE_CLOUD_PUBLIC_CLOUD/75d4c3895cb346008545900bffe851ce/f18f6a711d07462b80137df6ed533eee.html?locale=en-US&q=Compatibility%20Matrix
 
 ## Setup local development
 

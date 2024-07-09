@@ -1,18 +1,16 @@
-plugins {
-    id("sap.commerce.build") version("4.0.0")
-    id("sap.commerce.build.ccv2") version("4.0.0")
-    id("de.undercouch.download") version("5.5.0") // for downloading solr-9.x.tgz and optionally SAP Commerce Cloud zips.
-    `maven-publish` // for publishing to the local maven repo
-}
-
-import mpern.sap.commerce.build.tasks.HybrisAntTask
 import org.apache.tools.ant.taskdefs.condition.Os
 
 import de.undercouch.gradle.tasks.download.Download
 import de.undercouch.gradle.tasks.download.Verify
 
 import java.time.Instant
-import java.util.Base64
+
+plugins {
+    id("sap.commerce.build") version("4.0.0")
+    id("sap.commerce.build.ccv2") version("4.0.0")
+    id("de.undercouch.download") version("5.5.0") // for downloading solr-9.x.tgz and optionally SAP Commerce Cloud zips.
+    `maven-publish` // for publishing to the local maven repo
+}
 
 val solrVersionMap = mapOf( //
     /*
