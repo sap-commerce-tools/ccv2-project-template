@@ -1,3 +1,7 @@
+import mpern.sap.commerce.build.tasks.HybrisAntTask
+import com.github.difflib.UnifiedDiffUtils
+import com.github.difflib.DiffUtils
+
 plugins {
     id("sap.commerce.build") version("4.0.0")
     id("sap.commerce.build.ccv2") version("4.0.0")
@@ -13,10 +17,6 @@ buildscript {
         classpath("io.github.java-diff-utils:java-diff-utils:4.10")
     }
 }
-
-import mpern.sap.commerce.build.tasks.HybrisAntTask
-import com.github.difflib.UnifiedDiffUtils
-import com.github.difflib.DiffUtils
 
 val bootstrapDemo = tasks.register("bootstrapDemo") {
     group = "Boostrap"

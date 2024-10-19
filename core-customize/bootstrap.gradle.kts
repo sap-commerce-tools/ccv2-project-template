@@ -1,3 +1,6 @@
+import mpern.sap.commerce.build.tasks.HybrisAntTask
+import org.apache.tools.ant.taskdefs.condition.Os
+
 plugins {
     id("sap.commerce.build") version("4.0.0")
     id("sap.commerce.build.ccv2") version("4.0.0")
@@ -11,8 +14,6 @@ buildscript {
         classpath("com.databricks:sjsonnet_2.13:0.4.0")
     }
 }
-import mpern.sap.commerce.build.tasks.HybrisAntTask
-import org.apache.tools.ant.taskdefs.condition.Os
 
 repositories {
     flatDir { dirs("dependencies") }

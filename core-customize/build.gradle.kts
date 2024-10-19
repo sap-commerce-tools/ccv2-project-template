@@ -142,7 +142,7 @@ tasks.ybuild {
 
 tasks.wrapper {
     distributionType = Wrapper.DistributionType.ALL
-    gradleVersion = "8.7"
+    gradleVersion = "8.10.2"
 }
 
 //Optional: automate downloads from launchpad.support.sap.com
