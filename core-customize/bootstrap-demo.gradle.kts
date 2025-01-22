@@ -1,8 +1,13 @@
+import mpern.sap.commerce.build.tasks.HybrisAntTask
+import com.github.difflib.UnifiedDiffUtils
+import com.github.difflib.DiffUtils
+
 plugins {
-    id("sap.commerce.build") version("3.6.0")
-    id("sap.commerce.build.ccv2") version("3.6.0")
-    id("de.undercouch.download") version("4.1.2")
+    id("sap.commerce.build") version("4.0.0")
+    id("sap.commerce.build.ccv2") version("4.0.0")
+    id("de.undercouch.download") version("5.5.0")
 }
+
 buildscript {
     repositories {
         mavenCentral()
@@ -12,9 +17,6 @@ buildscript {
         classpath("io.github.java-diff-utils:java-diff-utils:4.10")
     }
 }
-import mpern.sap.commerce.build.tasks.HybrisAntTask
-import com.github.difflib.UnifiedDiffUtils
-import com.github.difflib.DiffUtils
 
 val bootstrapDemo = tasks.register("bootstrapDemo") {
     group = "Boostrap"
@@ -42,7 +44,7 @@ tasks.register("fixcmsflexcomponent") {
     }
 }
 tasks.register<de.undercouch.gradle.tasks.download.Download>("downloadSpartacusSampleData") {
-    src("https://github.com/SAP/spartacus/releases/download/storefront-3.4.1/spartacussampledata.2011.zip")
+    src("https://github.com/SAP-samples/cloud-commerce-sample-setup/releases/download/sampledata/spartacussampledata-version-2211-x.zip")
     dest("dependencies")
     onlyIfModified(true)
     useETag(true)
@@ -50,7 +52,7 @@ tasks.register<de.undercouch.gradle.tasks.download.Download>("downloadSpartacusS
 
 tasks.register<Copy>("unpackSpartacus") {
     dependsOn("downloadSpartacusSampleData", "bootstrapDefaultProject")
-    from(zipTree("dependencies/spartacussampledata.2011.zip"))
+    from(zipTree("dependencies/spartacussampledata.2211.zip"))
     into("hybris/bin/custom/spartacussampledata")
     // eachFile {
     //     val newPath = relativePath.segments.drop(1).toMutableList()

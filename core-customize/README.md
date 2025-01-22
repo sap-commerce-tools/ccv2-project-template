@@ -2,39 +2,47 @@
 
 > **Initial project bootstrap**
 >
-> 1. Download the latest SAP Commerce 2011 release zip file and put it into the `dependencies` folder
+> 1. Download the latest SAP Commerce 2211 release zip file and put it into the `dependencies` folder
 >    using the correct file name, e.g.
 >
 >    ```bash
->    cp ~/Downloads/CXCOMM201100P*.ZIP ./dependencies/hybris-commerce-suite-2011.6.zip
+>    cp ~/Downloads/CXCOMCL221100U_23*.ZIP ./dependencies/hybris-commerce-suite-2211.23.zip
 >    ```
 >    *Or* configure your S-User (e.g. using `gradle.properties`) and run `./gradlew downloadAndVerifyPlatform`
->    
-> 1. Bootstrap the starting point for your Commerce project by running the following command:
+> 2. Repeat the same for Integration extension pack if you want to use it.
+> 3. Download the [cloudhotfolders ZIP] into the `dependencies` folder (save as `cloudhotfolders-2211.zip`). If you
+>    don't need cloudhotfolders locally you can also remove them from the `build.gradle.kts` and the generated
+>    `localextensions.xml` after the next step.
+> 4. Bootstrap the starting point for your Commerce project by running the following command:
 >
 >    ```bash
 >    ./gradlew -b bootstrap.gradle.kts \
 >      -PprojectName=<name, e.g. coolshop> \
->      -ProotPackage=<package, e.g. com.cool.shop> \
->      -PintExtPackVersion=2102.1    # (optional) enable "SAP Commerce Cloud, Integration Extension Pack"
+>      -ProotPackage=<package, e.g. com.cool.shop>
 >    ```
+>    **Read the output!**
 >
->    Read the output!
+>    The following optional settings are available:
+>       - `-PintExtPackVersion=2102.1` enable "SAP Commerce Cloud, Integration Extension Pack" with version.
+>       - `-PsolrVersion=9.2` set the solr version for the manifest. To check which versions are supported, see
+>         Third-Party compatibility of the [Update Release Notes][update] of your selected version.
+>       - `-PaccStorefrontEnabled` enable code generation for the deprecated accelerator storefront.
 >
->    (If you use a headless setup: You can delete the generated `<projectName>storefront` extension
->     afterwards. Don't forget to remove it from `localextensions.xml` / `manifest.jsonnet` too)
-> 1. Review the generated configuration in `hybris/config`, especially the `hybris/config/environment/*.properties`
+> 5. Review the generated configuration in `hybris/config`, especially the `hybris/config/environment/*.properties`
 >    files and `localextensions.xml` (search for `TODO:` comments)
-> 1. Update the `manifest.jsonnet` (again, search for `TODO:` comments).\
+> 6. Update the `manifest.jsonnet` (again, search for `TODO:` comments).\
 >    You can use the [jsonnet] file to update the `manifest.json` for your project.
-> 1. Delete all bootstrap files, you don't need them anymore:
+> 7. Delete all bootstrap files, you don't need them any more:
 >
 >    ```bash
 >    rm -r bootstrap*
 >    ```
 >
-> 1. Delete this quote
-> 1. Commit and push the changes to your project repository :)
+> 8. Delete this quote and the demo-section at the bottom of this README
+> 9. Commit and push the changes to your project repository :)
+
+[update]: https://help.sap.com/docs/SAP_COMMERCE_CLOUD_PUBLIC_CLOUD/75d4c3895cb346008545900bffe851ce/f18f6a711d07462b80137df6ed533eee.html?locale=en-US&q=Compatibility%20Matrix
+[cloudhotfolders ZIP]: https://me.sap.com/notes/2817992
 
 We use Gradle + [commerce-gradle-plugin][plugin] to automate whole project setup.
 
@@ -67,10 +75,10 @@ jsonnet --output-file manifest.json manifest.jsonnet
 ### How do I add an addon to my storefront?
 
 1. Add the addon to the `manifest.json` (either by hand or via `manifest.jsonnet`, [documentation][addon])
-1. Run `./gradlew installManifestAddon`
-1. Reformat `<storefront>/extensioninfo.xml` (unfortunately, the the platform build messes it up when adding addons)
-1. Commit/push your changes
-1. Tell your team to run `./gradlew installManifestAddon` after pulling your changes.
+2. Run `./gradlew installManifestAddon`
+3. Reformat `<storefront>/extensioninfo.xml` (unfortunately, the the platform build messes it up when adding addons)
+4. Commit/push your changes
+5. Tell your team to run `./gradlew installManifestAddon` after pulling your changes.
 
 [addon]: https://help.sap.com/viewer/1be46286b36a4aa48205be5a96240672/LATEST/en-US/9a3ab7d08c704fccb7fd899e876d41d6.html
 

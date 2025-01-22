@@ -38,14 +38,14 @@ fi
 if ! command -v 'ng' > /dev/null 2>&1
 then
     error "Angular CLI (ng) not found"
-    error "please install @angular/cli@latest"
-    error "> yarn global add @angular/cli@latest"
+    error "please install @angular/cli@17"
+    error "> yarn global add @angular/cli@17"
     exit 1
 fi
 
 NG_VERSION="$(ng version | grep '@angular-devkit/core' | awk '{ print $2 }')"
-if case $NG_VERSION in 12.*) false;; *) true;; esac; then
-    error "Wrong angular version, please use Angular 12 (latest) (@angular/cli@latest)"
+if case $NG_VERSION in 17.*) false;; *) true;; esac; then
+    error "Wrong angular version, please use Angular 17 (@angular/cli@latest)"
     exit 1
 fi
 
@@ -54,30 +54,28 @@ ng new "$NAME" \
   --skip-install \
   --skip-git \
   --style=scss \
+  --standalone=false \
   --routing=false \
-  --packageManager=yarn
+  --package-manager=yarn
 (
     cd "$NAME" || exit 1
+
+cat > .npmrc <<-EOF
+@spartacus:registry=https://73554900100900004337.npmsrv.base.repositories.cloud.sap/
+//73554900100900004337.npmsrv.base.repositories.cloud.sap/:_auth=\${RBSC_NPM_CREDENTIALS}
+always-auth=true
+EOF
+
     progress "Adding Spartacus (PWA and SSR enabled)"
     echo "> Recommended minimal features: Cart, Product, SmartEdit"
     echo "> Just confirm the empty defaults for SmartEdit preview route and allow origin"
-    ng add @spartacus/schematics@latest \
+    ng add @spartacus/schematics@2211.23 \
       --pwa \
       --ssr \
       --use-meta-tags
     progress "Applying optimizations"
     cp -r "../bootstrap/.vscode" .
     angular="$(grep -i '@angular/animations' package.json | awk '{ print $2 }')"
-    mkdir -p "patches"
-    for template in ../bootstrap/patches/*.patch; do
-        output="patches/$(basename "$template")"
-        sed "s/@NAME@/$NAME/g" "$template" > "$output.1"
-        sed "s/@ANGULAR@/$angular/g" "$output.1" > "$output"
-        rm "$output.1"
-    done
-    for patch in patches/*.patch; do
-        patch -p0 < "$patch" || true
-    done
     yarn install
 )
 progress "Generating Manifest"
@@ -98,10 +96,13 @@ cat > manifest.json <<-EOF
             },
             "csr": {
                 "webroot": "dist/$NAME/browser/"
-            }
+            },
+            "enabledRepositories": [
+                "spartacus-6"
+            ]
         }
     ],
-    "nodeVersion": "12"
+    "nodeVersion": "20"
 }
 EOF
 progress "FINISHED"

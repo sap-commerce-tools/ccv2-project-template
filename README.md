@@ -1,7 +1,7 @@
 # CCv2 Template Repository
 
 - Best-practice setup
-- Based on SAP Commerce 2011
+- Based on SAP Commerce 2211
 - Generates B2C accelerator modules, OCC extension and OCC tests extension
 - Includes Spartacus storefront
 - Fully automated setup for local development

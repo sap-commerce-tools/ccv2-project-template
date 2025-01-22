@@ -26,7 +26,6 @@ local webapp(extension, path=null) = {
 
 // CONFIGURE YOUR MANIFEST HERE
 
-local storefrontExtension = '@projectName@storefront';
 local storefrontContextRoot = '';
 local storefrontAddons = [
   'smarteditaddon',
@@ -62,9 +61,8 @@ local smartEditWebapps = [
 ];
 
 // ------------ MANIFEST ------------
-function(intExtPackVersion=null, solrVersion=null, solrCustom='solr') {
-  commerceSuiteVersion: '2011.9',
-  useCloudExtensionPack: false,
+function(intExtPackVersion=null, solrVersion=null, solrCustom='solr', accStorefrontEnabled=false, storefrontExtension=nulll, commerceVersion='2211.23') {
+  commerceSuiteVersion: commerceVersion,
   extensionPacks: [
   ] + if intExtPackVersion != null then [
     {
@@ -82,10 +80,6 @@ function(intExtPackVersion=null, solrVersion=null, solrCustom='solr') {
     properties: [
       {
         location: 'hybris/config/cloud/common.properties',
-      },
-      {
-        location: 'hybris/config/cloud/aspect/accstorefront.properties',
-        aspect: 'accstorefront',
       },
       {
         location: 'hybris/config/cloud/aspect/api.properties',
@@ -107,7 +101,12 @@ function(intExtPackVersion=null, solrVersion=null, solrCustom='solr') {
         location: 'hybris/config/cloud/persona/development.properties',
         persona: 'development',
       },
-    ],
+    ] + if accStorefrontEnabled then [
+      {
+        location: 'hybris/config/cloud/aspect/accstorefront.properties',
+        aspect: 'accstorefront',
+      },
+    ] else [],
     extensions: {
       location: 'hybris/config/localextensions.xml',
       exclude: [],
@@ -119,10 +118,10 @@ function(intExtPackVersion=null, solrVersion=null, solrCustom='solr') {
   }
   else {},
   properties: [],
-  storefrontAddons: [
+  storefrontAddons: [] + if accStorefrontEnabled then [
     { addon: addon, storefront: storefrontExtension, template: 'yacceleratorstorefront' }
     for addon in storefrontAddons
-  ],
+  ] else [],
   aspects: [
     {
       name: 'backoffice',
@@ -132,14 +131,6 @@ function(intExtPackVersion=null, solrVersion=null, solrCustom='solr') {
         webapp('backoffice'),
         webapp('odata2webservices'),
       ] + smartEditWebapps,
-    },
-    {
-      name: 'accstorefront',
-      properties: [],
-      webapps: [
-        webapp(storefrontExtension, storefrontContextRoot),
-        webapp('mediaweb'),
-      ],
     },
     {
       name: 'backgroundProcessing',
@@ -161,7 +152,16 @@ function(intExtPackVersion=null, solrVersion=null, solrCustom='solr') {
         webapp('mediaweb'),
       ],
     },
-  ],
+  ] + if accStorefrontEnabled then [
+    {
+      name: 'accstorefront',
+      properties: [],
+      webapps: [
+        webapp(storefrontExtension, storefrontContextRoot),
+        webapp('mediaweb'),
+      ],
+    },
+  ] else [],
 } + if solrVersion != null then {
   // https://help.sap.com/viewer/1be46286b36a4aa48205be5a96240672/latest/en-US/b35bc14a62aa4950bdba451a5f40fc61.html#loiod7294323e5e542b7b37f48dd83565321
   solrVersion: solrVersion,
